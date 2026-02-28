@@ -3,7 +3,7 @@ import os
 pygame.font.init()
 
 #Game Run Vars
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 1300, 650
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 BORDER = pygame.Rect(WIDTH/2-5, 0, 10, HEIGHT)
 pygame.display.set_caption("Worm Game 3")
@@ -45,3 +45,16 @@ def movement(keyboard, wormX, wormY):
     elif keyboard[pygame.K_DOWN]:
         if yMomentum >= -WORMSPEED:
             yMomentum -= movInterval
+
+def GUIMain():
+    clock = pygame.time.Clock()
+    run = True
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            key = pygame.key.get_pressed()
+            if key[pygame.K_ESCAPE]:
+                run = False
+        movement(key, wormX, wormY)
+        displayRef()
+GUIMain()
