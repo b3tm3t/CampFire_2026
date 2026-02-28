@@ -42,9 +42,14 @@
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
             // Use the methods inside Player.js
-            worm.readInput(keys);
+            worm.calculateAngle(keys);
             worm.draw(ctx);
             
+            ctx.fillStyle = "white";
+            ctx.font = "24 px sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(`Angle: ${worm.currentAngle}`, 20, 40);
+            ctx.fillText(`Health: ${worm.health}`, 20, 70);
             requestAnimationFrame(gameLoop);
         }
         
