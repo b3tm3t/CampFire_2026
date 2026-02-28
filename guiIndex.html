@@ -40,39 +40,34 @@
             // 1. Calculate direction (-1, 0, or 1)
             let dx = 0;
             let dy = 0;
-            if(dy>(-speed)){
-                if(keys['w'] || keys['ArrowUp'])    dy -= 1;
-            } if(dy<speed){
-                if(keys['s'] || keys['ArrowDown'])  dy += 1;
-            } if(dx>(-speed)){ 
-                if(keys['a'] || keys['ArrowLeft'])  dx -= 1;
-            } if(dx<speed){
-                if(keys['d'] || keys['ArrowRight']) dx += 1;
-            }   
-                // 2. Normalize and Move
-                // This math ensures diagonal speed is the same as straight speed
-                if (dx !== 0 || dy !== 0) {
-                    const length = Math.sqrt(dx * dx + dy * dy);
-                    
-                    worm.x += (dx / length) * worm.speed;
-                    worm.y += (dy / length) * worm.speed;
-                }
-                worm.draw();
-                requestAnimationFrame(gameLoop);
+            if(keys['w'] || keys['ArrowUp'])    dy -= 1;
+            if(keys['s'] || keys['ArrowDown'])  dy += 1;
+            if(keys['a'] || keys['ArrowLeft'])  dx -= 1;
+            if(keys['d'] || keys['ArrowRight']) dx += 1;
+            // 2. Normalize and Move
+            // This math ensures diagonal speed is the same as straight speed
+            if (dx !== 0 || dy !== 0) {
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                worm.x += (dx / length) * worm.speed;
+                worm.y += (dy / length) * worm.speed;
             }
-            const myButton = document.getElementById('startBtn');
-            const myTitle = document.getElementById('message');
-            const mainCanvas = document.getElementById('gameCanvas');
-            const ctx = mainCanvas.getContext('2d');
-            const worm = new Player(700, 400, 30, "#2ecc71");
-            const keys = {};
-            myButton.addEventListener('click', () => {
-                myButton.style.display = 'none';
-                mainCanvas.width = 1400;
-                mainCanvas.height = 800;
-                mainCanvas.style.display = 'block';
-                gameLoop();
-            });
-        </script>
-    </body>
-    </html>
+            worm.draw();
+            requestAnimationFrame(gameLoop);
+        }
+        const myButton = document.getElementById('startBtn');
+        const myTitle = document.getElementById('message');
+        const mainCanvas = document.getElementById('gameCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const worm = new Player(700, 400, 30, "#2ecc71");
+        const keys = {};
+        myButton.addEventListener('click', () => {
+            myButton.style.display = 'none';
+            mainCanvas.width = 1400;
+            mainCanvas.height = 800;
+            mainCanvas.style.display = 'block';
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
