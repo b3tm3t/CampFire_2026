@@ -18,51 +18,40 @@
         <canvas id="gameCanvas"></canvas>
     </div>
     
-    <script>
+    <script type="module">
+        // 1. IMPORT: This pulls the code from your other file
+        import { Player } from './Player.js';
         
-        window.addEventListener('keydown', (e) => {keys[e.key] = true});
-        window.addEventListener('keyup', (e) => {keys[e.key] = false});
-        class Player {
-            constructor(x, y, size, color){
-                this.x=x;
-                this.y=y;
-                this.size=size;
-                this.color=color;
-                this.speed=3;
-            }
-            draw(){
-                ctx.fillStyle=this.color;
-                ctx.fillRect(this.x, this.y, this.size, this.size);
-            }
-        }
-        function gameLoop(){
-            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-            // 1. Calculate direction (-1, 0, or 1)
-            let dx = 0;
-            let dy = 0;
-            if(keys['w'] || keys['ArrowUp'])    dy -= 1;
-            if(keys['s'] || keys['ArrowDown'])  dy += 1;
-            if(keys['a'] || keys['ArrowLeft'])  dx -= 1;
-            if(keys['d'] || keys['ArrowRight']) dx += 1;
-            // 2. Normalize and Move
-            // This math ensures diagonal speed is the same as straight speed
-            if (dx !== 0 || dy !== 0) {
-                const length = Math.sqrt(dx * dx + dy * dy);
-                
-                worm.x += (dx / length) * worm.speed;
-                worm.y += (dy / length) * worm.speed;
-            }
-            worm.draw();
-            requestAnimationFrame(gameLoop);
-        }
+        // 2. SETUP
         const myButton = document.getElementById('startBtn');
         const myTitle = document.getElementById('message');
         const mainCanvas = document.getElementById('gameCanvas');
         const ctx = mainCanvas.getContext('2d');
-        const worm = new Player(700, 400, 30, "#2ecc71");
         const keys = {};
+        
+        // 3. CREATE PLAYER 
+        // We use the 5 arguments your class requires: (x, y, speed, width, health)
+        const worm = new Player(700, 400, 5, 30, 100);
+        
+        // 4. INPUTS
+        window.addEventListener('keydown', (e) => keys[e.key] = true);
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
+        
+        // 5. GAME LOOP
+        function gameLoop() {
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            
+            // Use the methods inside Player.js
+            worm.readInput(keys);
+            worm.draw(ctx);
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 6. START BUTTON
         myButton.addEventListener('click', () => {
             myButton.style.display = 'none';
+            myTitle.innerText = "Game Running";
             mainCanvas.width = 1400;
             mainCanvas.height = 800;
             mainCanvas.style.display = 'block';
