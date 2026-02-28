@@ -38,6 +38,8 @@
         function gameLoop(){
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             // 1. Calculate direction (-1, 0, or 1)
+            let dx = 0;
+            let dy = 0;
             if(dy>(-speed)){
                 if(keys['w'] || keys['ArrowUp'])    dy -= 1;
             } if(dy<speed){
