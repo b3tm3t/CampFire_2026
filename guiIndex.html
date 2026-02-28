@@ -7,24 +7,29 @@
             .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); text-align: center; }
             button { padding: 10px 20px; cursor: pointer; background: #2ecc71; color: white; border: none; border-radius: 5px; font-size: 1.1rem;}
             button:hover {background: #27ae60}
+            canvas { background:#000; display: none; border-radius: 10px;}
         </style>
     </head>
     <body>
 
         <div class="card">
             <h1 id="message">WormGameFirstGUI</h1>
-            <button id="actionBtn">Start Game</button>
+            <button id="startBtn">Start Game</button>
+            <canvas id="gameCanvas"></canvas>
         </div>
 
         <script>
-            const myButton = document.getElementById('actionBtn');
+            const myButton = document.getElementById('startBtn');
             const myTitle = document.getElementById('message');
+            const mainCanvas = document.getElementById('gameCanvas');
+            const ctx = mainCanvas.getContext('2d');
 
             myButton.addEventListener('click', () => {
-                myTitle.innerText = "Game Started! Code works!";
-                myTitle.style.color = "#3498db";
-                myButton.innerText = "It Worked!";
-            })
+                myButton.style.display = 'none';
+                mainCanvas.width = 600;
+                mainCanvas.height = 300;
+0               mainCanvas.style.display = 'block';
+            });
         </script>
     </body>
 </html>
