@@ -23,12 +23,38 @@
             const myTitle = document.getElementById('message');
             const mainCanvas = document.getElementById('gameCanvas');
             const ctx = mainCanvas.getContext('2d');
-
+            const worm = new Player(700, 400, 30, "2ecc71");
+            const keys = {};
+            window.addEventListener('keydown', (e) => {keys[e.key] = true});
+            window.addEventListener('keyup', (e) => {keys[e.key] = false});
+            class Player {
+                constructor(x, y, size, color){
+                    this.x=x;
+                    this.y=y;
+                    this.size=size;
+                    this.color=color;
+                    this.speed=7;
+                }
+                draw(){
+                    ctx.fillStyle=this.color;
+                    ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+        function gameLoop(){
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            if(keys['w'] || keys['ArrowUp']) worm.y -= worm.speed;
+            if(keys['s'] || keys['ArrowDown']) worm.y += worm.speed;
+            if(keys['a'] || keys['ArrowLeft']) worm.x -= worm.speed;
+            if(keys['d'] || keys['ArrowRight']) worm.x += worm.speed;
+            worm.draw();
+            requestAnimationFrame(gameLoop);
+        }
             myButton.addEventListener('click', () => {
                 myButton.style.display = 'none';
                 mainCanvas.width = 1400;
                 mainCanvas.height = 800;
                 mainCanvas.style.display = 'block';
+                gameLoop();
             });
         </script>
     </body>
