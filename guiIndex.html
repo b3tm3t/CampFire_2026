@@ -1,52 +1,75 @@
-<script>
-    // 1. Always define Classes first
-    class Player {
-        constructor(x, y, size, color){
-            this.x = x;
-            this.y = y;
-            this.size = size;
-            this.color = color;
-            this.speed = 7;
-        }
-        draw(){
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.size, this.size);
-        }
-    }
-
-    // 2. Select your HTML elements
-    const myButton = document.getElementById('startBtn');
-    const myTitle = document.getElementById('message');
-    const mainCanvas = document.getElementById('gameCanvas');
-    const ctx = mainCanvas.getContext('2d');
-
-    // 3. Now you can create the 'worm' because 'Player' is defined
-    const worm = new Player(400, 300, 30, "#2ecc71"); // Added # here
-    const keys = {};
-
-    // 4. Input listeners
-    window.addEventListener('keydown', (e) => { keys[e.key] = true; });
-    window.addEventListener('keyup', (e) => { keys[e.key] = false; });
-
-    // 5. The Game Loop function
-    function gameLoop(){
-        ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worm Game 3 GUI</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f3;}
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); text-align: center; }
+        button { padding: 10px 20px; cursor: pointer; background: #2ecc71; color: white; border: none; border-radius: 5px; font-size: 1.1rem;}
+        button:hover {background: #27ae60}
+        canvas { background:#000; display: none; border-radius: 10px;}
+    </style>
+</head>
+<body>
+    
+    <div class="card">
+        <h1 id="message">WormGameFirstGUI</h1>
+        <button id="startBtn">Start Game</button>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <script>
         
-        if(keys['w'] || keys['ArrowUp']) worm.y -= worm.speed;
-        if(keys['s'] || keys['ArrowDown']) worm.y += worm.speed;
-        if(keys['a'] || keys['ArrowLeft']) worm.x -= worm.speed;
-        if(keys['d'] || keys['ArrowRight']) worm.x += worm.speed;
-        
-        worm.draw();
-        requestAnimationFrame(gameLoop);
-    }
-
-    // 6. The Button Click
-    myButton.addEventListener('click', () => {
-        myButton.style.display = 'none';
-        mainCanvas.width = 800; // Adjusted for better fit
-        mainCanvas.height = 600;
-        mainCanvas.style.display = 'block';
-        gameLoop();
-    });
-</script>
+        window.addEventListener('keydown', (e) => {keys[e.key] = true});
+        window.addEventListener('keyup', (e) => {keys[e.key] = false});
+        class Player {
+            constructor(x, y, size, color){
+                this.x=x;
+                this.y=y;
+                this.size=size;
+                this.color=color;
+                this.speed=3;
+            }
+            draw(){
+                ctx.fillStyle=this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+        function gameLoop(){
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            // 1. Calculate direction (-1, 0, or 1)
+            let dx = 0;
+            let dy = 0;
+            
+            if(keys['w'] || keys['ArrowUp'])    dy -= 1;
+            if(keys['s'] || keys['ArrowDown'])  dy += 1;
+            if(keys['a'] || keys['ArrowLeft'])  dx -= 1;
+            if(keys['d'] || keys['ArrowRight']) dx += 1;
+            
+            // 2. Normalize and Move
+            // This math ensures diagonal speed is the same as straight speed
+            if (dx !== 0 || dy !== 0) {
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                worm.x += (dx / length) * worm.speed;
+                worm.y += (dy / length) * worm.speed;
+            }
+            worm.draw();
+            requestAnimationFrame(gameLoop);
+        }
+        const myButton = document.getElementById('startBtn');
+        const myTitle = document.getElementById('message');
+        const mainCanvas = document.getElementById('gameCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const worm = new Player(700, 400, 30, "#2ecc71");
+        const keys = {};
+        myButton.addEventListener('click', () => {
+            myButton.style.display = 'none';
+            mainCanvas.width = 1400;
+            mainCanvas.height = 800;
+            mainCanvas.style.display = 'block';
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
