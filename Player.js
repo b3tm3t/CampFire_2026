@@ -13,7 +13,7 @@ class Player {
 
     length = 1;
     health = 0;
-    breath = 10;
+    breath = 300;
 
     secondsSurvived = 0;
     
@@ -28,18 +28,21 @@ class Player {
         this.health = health;
 
         speed = 0;
-
-        const grid = new Int8Array(width * height);
+        
+        wormNodes = new Array(1);
 
     }
 
     readInput(input) {
-        if (input.ArrowUp) this.y -= this.speed;
-        if (input.ArrowDown) this.y += this.speed;
-        if (input.ArrowLeft) this.x -= this.speed;
-        if (input.ArrowRight) this.x += this.speed;
+        if (input.ArrowUp) this.pos_y -= this.speed;
+        if (input.ArrowDown) this.pos_y += this.speed;
+        if (input.ArrowLeft) this.pos_x -= this.speed;
+        if (input.ArrowRight) this.pos_x += this.speed;
+
 
     }
+
+
 
     
 
