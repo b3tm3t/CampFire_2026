@@ -16,6 +16,8 @@ export class Player {
 
     angleTurning = 1;
 
+    forwardVelocity = 0;
+
     secondsSurvived = 0;
     
 
@@ -28,29 +30,30 @@ export class Player {
 
         this.health = health;
 
-        speed = 0;
+        this.speed = 0;
         
-        wormNodes = new Array(1);
+        this.wormNodes = new Array(1);
 
     }
 
     calculateAngle(input) { 
         
-        leftRight = input.ArrowLeft - input.ArrowRight;
-        upDown = input.ArrowUp - input.ArrowDown;
+        let leftRight = input.ArrowLeft - input.ArrowRight;
+        let upDown = input.ArrowUp - input.ArrowDown;
 
-        desiredAngle = Math.atan(upDown/leftRight);
+        let desiredAngle = Math.atan(upDown/leftRight);
 
-        angleDiff = (desiredAngle - this.currentAngle) % (Math.PI * 2); 
+        let angleDiff = (desiredAngle - this.currentAngle) % (Math.PI * 2); 
 
-        if (angleDiff > Math.PI) {
-
+        if (angleDiff > Math.PI) { // Turn clockwise
+            this.currentAngle += (Math.PI)/180 * this.angleTurning;
+        } else { // Turn anti-clockwise
+            this.currentAngle -= (Math.PI)/180 * this.angleTurning;
         }
 
-
-
-
-        
+    }
+    
+    calculateVelocity(input) {
 
     }
 
