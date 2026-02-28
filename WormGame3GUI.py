@@ -8,7 +8,7 @@ WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 BORDER = pygame.Rect(WIDTH/2-5, 0, 10, HEIGHT)
 pygame.display.set_caption("Worm Game 3")
 FPS = 60
-statFont = pygame.font.SysFont('applechancery', 30)
+statFont = pygame.font.SysFont('applechancery', 20)
 keyboard = pygame.key.get_pressed()
 movInterval = 0.1
 #Colors
