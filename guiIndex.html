@@ -3,7 +3,28 @@
     <head>
         <title>Worm Game 3 GUI</title>
         <style>
-            body { font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif}
+            body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f3;}
+            .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); text-align: center; }
+            button { padding: 10px 20px; cursor: pointer; background: #2ecc71; color: white; border: none; border-radius: 5px; font-size: 1.1rem;}
+            button:hover {background: #27ae60}
         </style>
     </head>
+    <body>
+
+        <div class="card">
+            <h1 id="message">WormGameFirstGUI</h1>
+            <button id="actionBtn">Start Game</button>
+        </div>
+
+        <script>
+            const myButton = document.getElementById('actionBtn');
+            const myTitle = document.getElementById('message');
+
+            myButton.addEventListener('click', () => {
+                myTitle.innerText = "Game Started! Code works!";
+                myTitle.style.color = "#3498db";
+                myButton.innerText = "It Worked!";
+            })
+        </script>
+    </body>
 </html>
