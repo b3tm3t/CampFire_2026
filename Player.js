@@ -136,23 +136,18 @@ export class Player {
         }
     }
 
-    
+    eat(num) { // See how much you eat, and increase 
+
+    }
 
     draw(ctx) { // Like refresh
 
-        ctx.save(); // 1. Save the current canvas state (no rotation)
-
-        // 2. Move the "origin" (0,0) to the player's position
-        ctx.translate(this.pos_x, this.pos_y);
-
-        // 3. Rotate the canvas to the current angle
-        ctx.rotate(this.currentAngle);
-
+        
         ctx.fillStyle = "#2ecc71";
 
         // 4. Draw the square CENTERED on (0,0)
         // We use -width/2 so the center of the square is the rotation point
-        ctx.fillRect(-this.width / 2, -this.width / 2, this.width, this.width);
+        ctx.fillRect(this.pos_x-this.width / 2, this.pos_y-this.width / 2, this.width, this.width);
 
         ctx.restore(); // 5. Restore the canvas to how it was before
         
