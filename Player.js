@@ -136,6 +136,20 @@ export class Player {
                 ctx.fillRect(5, -5, 5, 5); // Right eye
                 ctx.fillRect(5, 5, 5, 5);  // Left eye
             }
+            // Health Bar Background (Red)
+                ctx.fillStyle = "red";
+                ctx.fillRect(-25, -40, 50, 6);
+
+                // Health Bar Foreground (Green)
+                // Calculates width based on health percentage
+                let hpPercent = this.health / 100; 
+                ctx.fillStyle = "#00ff00";
+                ctx.fillRect(-25, -40, 50 * hpPercent, 6);
+                
+                // Border (Black outline)
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(-25, -40, 50, 6);
             
             ctx.restore();
         }

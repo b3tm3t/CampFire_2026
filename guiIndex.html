@@ -48,6 +48,11 @@
         <h1 id="message">Wormy the Wormypus</h1>
         <button id="startBtn">Start Game</button>
     </div>
+    <div id="winCard" class="card" style="display: none;">
+        <h1>You Win!</h1>
+        <p>The garden is clean!</p>
+        <button onclick="location.reload()">Play Again</button>
+    </div>
     <canvas id="gameCanvas"></canvas>
     
     <script type="module">
@@ -136,9 +141,12 @@
             
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            // D. HUD
-            ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(0, 0, mainCanvas.width, 60); 
+            // E. WIN CONDITION
+            // Check if 99% of dirt is gone
+            if (map.dirtRemoved / map.totalDirtPixels > 0.99) {
+                document.getElementById('winCard').style.display = 'block';
+                return; // Stop the game loop
+            }
             
             // Calculate Percentage
             let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
