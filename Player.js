@@ -112,9 +112,28 @@ export class Player {
         
     }
 
-    updatePos() {
-        this.pos_x += Math.cos(this.currentAngle) * this.forwardVelocity;
-        this.pos_y += Math.sin(this.currentAngle) * this.forwardVelocity;
+    // 1. Accept the canvas size so we know where the walls are
+    updatePos(canvasWidth, canvasHeight) {
+        
+        // 2. Calculate the "Half Width" (radius) 
+        // Since you draw from the center, this is the distance from center to edge.
+        let halfSize = this.width / 2;
+
+        // 3. Calculate where the player WANTS to go next
+        let nextX = this.pos_x + Math.cos(this.currentAngle) * this.forwardVelocity;
+        let nextY = this.pos_y + Math.sin(this.currentAngle) * this.forwardVelocity;
+
+        // 4. Horizontal Collision (Left and Right Walls)
+        // logic: Is nextX greater than the left edge AND less than the right edge?
+        if (nextX > halfSize && nextX < canvasWidth - halfSize) {
+            this.pos_x = nextX;
+        }
+
+        // 5. Vertical Collision (Top and Bottom Walls)
+        // logic: Is nextY greater than the top edge AND less than the bottom edge?
+        if (nextY > halfSize && nextY < canvasHeight - halfSize) {
+            this.pos_y = nextY;
+        }
     }
 
     
