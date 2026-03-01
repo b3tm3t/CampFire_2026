@@ -127,36 +127,9 @@
         let gameTime = 120; // 2 minutes (in seconds)
         let isGameRunning = false;
 
-        let timeLeft = 120;
-
         // --- ASSETS ---
         const backgroundImage = new Image();
         backgroundImage.src = "./BackdropWormGame.png";
-        
-        // --- 3. CREATE OBJECTS ---
-        const rocks = [];
-        
-        // Create 20 random rocks
-        for(let i = 0; i < 20; i++) {
-            // Random Position
-            let rx = Math.random() * worldWidth;
-            let ry = Math.random() * (worldHeight - 310) + 310;
-            
-            // Random Size (Radius between 30 and 80)
-            let rSize = Math.random() * 50 + 30;
-            
-            // Create the rock
-            rocks.push(new Rock(rx, ry, rSize));
-        }
-        // --- FIX: Start Length is now 1 ---
-
-        const map = new Map(worldWidth, worldHeight);
-        const worm = new Player(700, 400, 4, 30, 100, 1, map);
-        map.setPlayer(worm); 
-        
-        // Input Handling
-        window.addEventListener('keydown', (e) => keys[e.key] = true);
-        window.addEventListener('keyup', (e) => keys[e.key] = false);
         
         // --- AUDIO SYSTEM ---
         const playlist = ['./audio/Worm on a roll.mp3', './audio/Egypt.mp3'];
@@ -170,35 +143,45 @@
             audioPlayer.play().catch(e => console.log("Audio waiting for interaction"));
         }
         audioPlayer.addEventListener('ended', playNextTrack);
+
+        // --- CREATE OBJECTS ---
+        const map = new Map(worldWidth, worldHeight);
+        const rocks = [];
         
-        // Generate Rocks
+        // Create 20 random rocks
         for(let i = 0; i < 20; i++) {
             let rx = Math.random() * worldWidth;
             let ry = Math.random() * (worldHeight - 310) + 310;
             let rSize = Math.random() * 50 + 30;
             rocks.push(new Rock(rx, ry, rSize));
         }
-        
-        // Create Worm (Start length 1)
-        // Params: x, y, maxSpeed, width, health, length, map
 
+        // Create Worm (Start length 1)
+        const worm = new Player(700, 400, 4, 30, 100, 1, map);
+        map.setPlayer(worm); 
+        
         // --- MAIN GAME LOOP ---
         function gameLoop() {
             if (!isGameRunning) return;
             
-            // 1. UPDATE PHYSICS
+            // 1. UPDATE TIMER
+            let secondsPassed = Math.floor(ticks / 60);
+            let timeLeft = gameTime - secondsPassed;
+
+            // 2. UPDATE PHYSICS
             worm.calculateAngle(keys);
             
-            let dirtDug = map.dig(worm.wormNodes[0].pos_x, worm.wormNodes[0].pos_y, worm.wormNodes[0].width);
-            // Calculate dirt removed
+            let dirtDug = 0;
+            // Dig at every node to ensure smooth tunnels
             for (let i = 0; i < worm.wormNodes.length; i++) {
-                map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
+                dirtDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
             }
             
+            // Note: If movement is stuck, check Player.js friction divisor (should be 1000, not 150)
             worm.calculateVelocity(keys, dirtDug);
             worm.updatePos(worldWidth, worldHeight, rocks); 
             
-            // 2. CHECK WIN/LOSS CONDITIONS
+            // 3. CHECK WIN/LOSS CONDITIONS
             
             // Condition A: Health
             if (worm.health <= 0) {
@@ -206,34 +189,32 @@
                 return;
             }
             
-            worm.drown();
-            
+            // Condition B: Time
+            if (timeLeft <= 0) {
+                endGame("Time's Up!", "The soil toxicity levels remain too high.");
+                return;
+            }
+
+            // Condition C: Regen Health Randomly
             if (Math.random() < 0.01) {
-                worm.health = Math.min(100, worm.health + 2);
+                worm.health = Math.min(100, worm.health + 0.1);
             }
             
-            // ... rest of loop (growth logic, camera, drawing) ...
-            // B. DIGGING LOGIC
-            // Dig at every node position
-            
-            
-            
-            // --- FIX: PERCENTAGE BASED GROWTH ---
-            // Calculate current percentage
+            // Condition D: Victory (99.9% Cleared)
             let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
             if (percent > 99.9) {
                 endGame("Victory!", "The garden is clean and the soil is fresh!");
                 return;
             }
             
-            // 3. GROWTH LOGIC
+            // 4. GROWTH LOGIC
             // Formula: Start at 1. Add 1 segment for every 0.5% cleared.
             let targetLength = 1 + Math.floor(percent / 0.5);
             while (worm.wormNodes.length < targetLength) {
                 worm.grow();
             }
             
-            // 4. CAMERA
+            // 5. CAMERA
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
@@ -243,7 +224,7 @@
             // Dynamic Zoom
             map.cameraScale = Math.max(3 - worm.wormNodes.length/80, 1.0);
             
-            // 5. DRAWING
+            // 6. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
             ctx.save(); 
@@ -258,35 +239,26 @@
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
             
-            // Rain
+            // Rain Logic
             if (Math.random() < 0.0002) map.startRain();
             if (map.isRaining) {
-                
-                map.rainTime += 1
-                
-                if (map.rainTime < 60 * 20) {
-                    map.rainLevel += 1; // The rain goes up
-                } else if (map.rainTime < 60 * 30) {
-                    
-                } else if (map.rainTime < 60 * 50) {
-                    map.rainLevel -= 1; // Goes down
-                } else {
-                    map.isRaining = false;
-                }
+                map.rainTime = (map.rainTime || 0) + 1;
+                if (map.rainTime < 60 * 20) map.rainLevel += 1;
+                else if (map.rainTime < 60 * 50) map.rainLevel -= 1;
+                else { map.isRaining = false; map.rainTime = 0; }
             }
             
-            map.draw(ctx);
+            map.draw(ctx, worldWidth); // Passed worldWidth to fix drawing
             worm.draw(ctx);
             
-            
-            // Rocks (Draw before restore so they move with camera)
+            // Rocks 
             for (let r of rocks) {
                 r.draw(ctx);
             }
             
             ctx.restore(); 
             
-            // 6. HUD (Head Up Display)
+            // 7. HUD (Head Up Display)
             drawHUD(percent, timeLeft, worm.health);
             
             requestAnimationFrame(gameLoop);
@@ -331,7 +303,7 @@
             // 2. Show Instructions
             instructionCard.style.display = 'block';
             
-            let secondsLeft = 10;
+            let secondsLeft = 5;
             
             // 3. Countdown Timer
             const timerInterval = setInterval(() => {
@@ -360,7 +332,6 @@
                 mainCanvas.height = window.innerHeight;
             }
         });
-        
         
     </script>
 </body>
