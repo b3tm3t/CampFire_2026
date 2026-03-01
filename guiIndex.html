@@ -20,7 +20,7 @@
     
     <script type="module">
         // 1. IMPORT: This pulls the code from your other file
-        import { Player } from './Player.js';
+        import {Player} from './Player.js';
         
         // 2. SETUP
         const myButton = document.getElementById('startBtn');
@@ -41,15 +41,19 @@
         function gameLoop() {
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
-            // Use the methods inside Player.js
+            // Call ALL three methods in order
             worm.calculateAngle(keys);
+            worm.calculateVelocity(keys);
+            worm.updatePos(); 
+            
             worm.draw(ctx);
             
+            // Text displays
             ctx.fillStyle = "white";
             ctx.font = "24px sans-serif";
-            ctx.textAlign = "left";
-            ctx.fillText(`Angle: ${worm.currentAngle}`, 20, 40);
-            ctx.fillText(`Health: ${worm.health}`, 20, 70);
+            ctx.fillText(`Angle: ${worm.currentAngle.toFixed(2)}`, 20, 40);
+            ctx.fillText(`Velocity: ${worm.forwardVelocity}`, 20, 70);
+            
             requestAnimationFrame(gameLoop);
         }
         
