@@ -1,4 +1,4 @@
-
+import { Node } from './Node.js';
 
 export class Player {
     // Materials
@@ -7,6 +7,8 @@ export class Player {
 
     speed = 0;
     width = 0;
+
+    cameraScale = 20; // How much width is increased
 
     currentAngle = 0;
 
@@ -22,7 +24,7 @@ export class Player {
     secondsSurvived = 0;
     
 
-    constructor(pos_x, pos_y, speed, width, health) {
+    constructor(pos_x, pos_y, speed, width, health, length) {
         this.pos_x = pos_x;
         this.pos_y = pos_y;
 
@@ -30,45 +32,16 @@ export class Player {
         this.width = width;
 
         this.health = health;
+        this.length = length;
         
         this.wormNodes = new Array(1);
+
+        this.wormNodes[0] = new Node(pos_x, pos_y, 1, this);
 
     }
 
     calculateAngle(input) { 
-        /*
-        let dx = input.ArrowRight - input.ArrowLeft;
-        let dy = input.ArrowDown - input.ArrowUp;
-
-        if (dx !== 0 || dy !== 0) {
-            
-            this.desiredAngle = Math.atan(dy, dx);
-
-            let diff = this.desiredAngle - this.currentAngle;
-            
-            // 1. Normalize the difference so it's between -PI and PI
-            // This ensures the worm always takes the shortest turn
-            if (diff < -Math.PI) diff += Math.PI * 2;
-            if (diff > Math.PI)  diff -= Math.PI * 2;
-
-            let step = (Math.PI / 180) * this.angleTurning;
-
-            if (Math.abs(diff) < step) {
-                // We are close enough to just snap to the target
-                this.currentAngle = this.desiredAngle;
-            } else {
-                // 2. If diff is positive, turn clockwise. If negative, turn counter-clockwise.
-                if (diff > 0) {
-                    console.log("Direction", "Clockwise ");
-                    this.currentAngle += step;
-                } else {
-                    console.log("Direction", "CounterClockwise ");
-                    this.currentAngle -= step;
-                }
-            }
-
-        }
-        */
+        
         // Safer boolean math
         let dx = (input.d ? 1 : 0) - (input.a ? 1 : 0);
         let dy = (input.s ? 1 : 0) - (input.w ? 1 : 0);
@@ -147,7 +120,13 @@ export class Player {
 
         // 4. Draw the square CENTERED on (0,0)
         // We use -width/2 so the center of the square is the rotation point
-        ctx.fillRect(this.pos_x-this.width / 2, this.pos_y-this.width / 2, this.width, this.width);
+
+        let headNode = this.wormNodes[0];
+
+        let screenX = headNode.width / 2 * this.cameraScale;
+        let screenY = headNode.width / 2 * this.cameraScale;
+
+        ctx.fillRect(this.pos_x-screenX, this.pos_y-screenY, screenX, screenY);
 
         ctx.restore(); // 5. Restore the canvas to how it was before
         

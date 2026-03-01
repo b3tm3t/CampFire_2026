@@ -1,5 +1,3 @@
-import {numpy as np} from 'numpy';
-
 class Map {
     // Materials
     static NOTHING = 0;
@@ -14,6 +12,8 @@ class Map {
     static POOP = 10;
     static TRASH = 20;
 
+    scale = 20; // How much pixels wide each thing is
+
     constructor(width, height) {
         this.width = width;
         this.height = height;
@@ -22,13 +22,37 @@ class Map {
     }
 
     setTile(x, y, value) {
-        grid[(y * width) + x] = value;
+        if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+            this.grid[(y * this.width) + x] = value;
+        }
+    }
+
+    changeScale(newScale) {
+        this.scale = newScale;
     }
 
     dig(pos_x, pos_y, radius) { // Int x, int y, int radius
         for (let x = -radius; x < radius; x++) {
             for (let y = -radius; y < radius; y++) { 
                 this.setTile(pos_x, pos_y, NOTHING);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const tile = this.grid[(y * this.width) + x];
+
+                if (tile === Map.DIRT) {
+                    ctx.fillStyle = "#8B4513"; // SaddleBrown color for dirt
+                    ctx.fillRect(
+                        x * this.scale, 
+                        y * this.scale, 
+                        this.scale, 
+                        this.scale
+                    );
+                }
             }
         }
     }
