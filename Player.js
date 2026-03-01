@@ -73,7 +73,7 @@ export class Player {
         
         // Your logic for dirt friction:
         // Change /150 to /1000
-        this.forwardVelocity = Math.max(0, Math.min(this.maxSpeed, this.forwardVelocity - dirtDug/150)); 
+        this.forwardVelocity = Math.max(0, Math.min(this.maxSpeed, this.forwardVelocity - dirtDug/175)); 
     }
     
     // --- UPDATED: Now accepts 'rocks' to check collisions ---
