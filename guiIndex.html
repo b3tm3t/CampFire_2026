@@ -68,11 +68,7 @@
         backgroundImage.src = "./BackdropWormGame.png";
         
         // --- 3. CREATE OBJECTS ---
-        // FIX: Increased map size. Player is at 700, so map must be wider than 300.
-        // We set it to 1000 so the loop doesn't lag too much.
         const map = new Map(1000, 800); 
-        
-        // Player starts at (700, 400)
         const worm = new Player(700, 400, 5, 30, 100, 1, map);
         
         // Input Handling
@@ -90,7 +86,6 @@
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             // Clamp camera to world edges
-            // FIX: Removed the second duplicate block that used 'zoom' (which caused the crash)
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
             
@@ -106,23 +101,20 @@
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
-                // Fallback Grid
                 ctx.strokeStyle = "#444";
                 ctx.lineWidth = 5;
                 ctx.strokeRect(0, 0, worldWidth, worldHeight);
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                for(let i=0; i<worldWidth; i+=200) { ctx.moveTo(i,0); ctx.lineTo(i, worldHeight); }
-                for(let i=0; i<worldHeight; i+=200) { ctx.moveTo(0,i); ctx.lineTo(worldWidth, i); }
-                ctx.stroke();
             }
             
-            map.draw(ctx);
+            // --- UPDATED DRAW CALL ---
+            // Pass the camera info so the map knows what to skip!
+            map.draw(ctx, camX, camY, mainCanvas.width, mainCanvas.height);
+            
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA
             
-            // D. HUD (Fixed on screen)
+            // D. HUD
             ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, mainCanvas.width, 60); 
 
