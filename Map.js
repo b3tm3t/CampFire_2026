@@ -1,4 +1,4 @@
-
+import {numpy as np} from 'numpy';
 
 class Map {
     // Materials
