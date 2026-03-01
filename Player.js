@@ -12,7 +12,12 @@ export class Player {
     currentAngle = 0;
     health = 0;
 
-    hydration;
+    air;
+
+    // Tasks
+
+    touchedTopLeftCorner = false;
+    touchedTopRightCorner = false;
     
     angleTurning = 6; 
     forwardVelocity = 0;
@@ -153,7 +158,15 @@ export class Player {
 
     drown() {
         if (this.map_y > this.map.rainLevel) { // If it is deeper down in the 
-            this.hydration += 1;
+            this.air -= 1;
+        } else {
+            this.air += 1;
+        }
+
+        this.air = Math.max(Math.min(100, this.air), 0);
+
+        if (this.air == 0) {
+            health --;
         }
 
     }
@@ -212,5 +225,19 @@ export class Player {
         
         // Update length property
         this.length = this.wormNodes.length;
+    }
+
+    detectCornersTouched() {
+        if ((this.map_y) < 330) {
+            
+            if (this.map_x < 40) {
+                this.touchedTopLeftCorner = true;
+            } else if (this.map_x > this.map.width - 30) {
+                this.touchedTopRightCorner = true;
+            }
+            
+        }
+
+        console.log("Topsoils: ", this.touchedTopLeftCorner + " " + this.touchedTopRightCorner);
     }
 }   

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Worm Game Final</title>
+    <title>THE Worm Game The Third</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -66,7 +66,7 @@
 <body>
     
     <div id="startCard" class="card">
-        <h1>Wormy the Wormypus</h1>
+        <h1>THE Worm Game The Third</h1>
         <p>The garden needs you.</p>
         <button id="startBtn">Start Mission</button>
     </div>
@@ -90,7 +90,7 @@
             </div>
         </div>
         
-        <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 15...</h3>
+        <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 5...</h3>
     </div>
     
     <div id="endCard" class="card" style="display: none;">
@@ -106,22 +106,22 @@
         import { Map } from './Map.js';
         import { Rock } from './Rock.js';
         
-
+        
         const missions = [
-            {
-                title: "Churn up the soil",
-                text: "Dig up 10 % of the soil."
-            },
-            {
-                title: "Surface Sweep",
-                text: "Dig up the entire topsoil"
-            },
-            {
-                title: "Let Mother Earth breathe",
-                text: "Create a clear path between the top and bottom."
-            }
+        {
+            title: "Churn up the soil",
+            text: "Dig up 2.5 % of the soil."
+        },
+        {
+            title: "Surface Sweep",
+            text: "Dig up the entire topsoil"
+        },
+        {
+            title: "Let Mother Earth breathe",
+            text: "Create a clear path between the top and bottom."
+        }
         ];
-
+        
         // --- DOM ELEMENTS ---
         const startCard = document.getElementById('startCard');
         const taskCard = document.getElementById('taskCard');
@@ -135,14 +135,18 @@
         const keys = {};
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
+        // Mission
+        
+        let randomIndex = 0;
+        let percent = 0;
         
         // --- WORLD SETTINGS ---
         const worldWidth = 3200;
         const worldHeight = 1800;
         let ticks = 0;
-        let gameTime = 180; // 3 minutes (in seconds)
+        let gameTime = 30; // 3 minutes (in seconds)
         let isGameRunning = false;
-
+        
         // --- ASSETS ---
         const backgroundImage = new Image();
         backgroundImage.src = "./BackdropWormGame.png";
@@ -159,21 +163,21 @@
             audioPlayer.play().catch(e => console.log("Audio waiting for interaction"));
         }
         audioPlayer.addEventListener('ended', playNextTrack);
-
+        
         // --- CREATE OBJECTS ---
         const map = new Map(worldWidth, worldHeight);
         const rocks = [];
         
         // Create 20 random rocks
-        for(let i = 0; i < 20; i++) {
+        for(let i = 0; i < 30; i++) {
             let rx = Math.random() * worldWidth;
             let ry = Math.random() * (worldHeight - 310) + 310;
             let rSize = Math.random() * 50 + 30;
             rocks.push(new Rock(rx, ry, rSize));
         }
-
+        
         // Create Worm (Start length 1)
-        const worm = new Player(700, 400, 4, 30, 100, 1, map);
+        const worm = new Player(700, 400, 5, 30, 100, 1, map);
         map.setPlayer(worm); 
         
         // --- MAIN GAME LOOP ---
@@ -183,9 +187,11 @@
             // 1. UPDATE TIMER
             let secondsPassed = Math.floor(ticks / 60);
             let timeLeft = gameTime - secondsPassed;
-
+            
             // 2. UPDATE PHYSICS
             worm.calculateAngle(keys);
+            
+            worm.detectCornersTouched();
             
             let dirtDug = 0;
             // Dig at every node to ensure smooth tunnels
@@ -207,21 +213,49 @@
             
             // Condition B: Time
             if (timeLeft <= 0) {
-                endGame("Time's Up!", "The soil toxicity levels remain too high.");
+                
+                switch (randomIndex) {
+                    case 0:
+                    if (percent > 2.5) {
+                        endGame("Mission Successful!", "You cleared more than 2.5 % of the soil, improving the soil's fertility");
+                    } else {
+                        endGame("Mission Failed!", "You failed to digest 2.5 % of the soil.");
+                    }
+                    
+                    break;
+                    case 1:
+                    if (worm.touchedTopLeftCorner && worm.touchedTopRightCorner) {
+                        endGame("Mission Successful!", "You bridged the topsoil together, improving the land for farming, and growing plants!");
+                    } else {
+                        endGame("Mission Failed!", "You failed to bridge the topsoil together.");
+                    }
+                    
+                    break;
+                    
+                    case 2:
+                    if ((map.lowestDugY > worldHeight - 50) && (320 > map.highestDugY)) {
+                        endGame("Mission Successful!", "You tunneled deep into the ground! The water management and oxygen penetration has improved substantially!");
+                    } else {
+                        endGame("Mission Failed!", "You failed to tunnel deep into the ground.");
+                    }
+                }
+                
                 return;
             }
 
+            console.log("Y limits:", (map.lowestDugY > worldHeight - 50) && (320 > map.highestDugY));
+            
+            
+            
             // Condition C: Regen Health Randomly
             if (Math.random() < 0.01) {
                 worm.health = Math.min(100, worm.health + 0.1);
             }
             
+            
+            
             // Condition D: Victory (75% Cleared)
-            let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
-            if (percent > 75) {
-                endGame("Victory!", "The garden is clean and the soil is fresh!");
-                return;
-            }
+            percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
             
             // 4. GROWTH LOGIC
             // Formula: Start at 1. Add 1 segment for every 0.5% cleared.
@@ -257,7 +291,7 @@
             
             // Rain Logic
             if (Math.random() < 0.0002) map.startRain();
-
+            
             if (map.isRaining) {
                 map.rainTime = (map.rainTime || 0) + 1;
                 if (map.rainTime < 60 * 20) map.rainLevel += 1;
@@ -293,7 +327,7 @@
             let currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
             
             // Line 1
-            ctx.fillText(`Dirt Cleared: ${percentString}%`, 20, 35);
+            ctx.fillText(`Dirt Cleared: ${percentString}%  |  Position: ${worm.map_x}, ${worm.map_y}`, 20, 35);
             
             // Line 2 (Timer color changes if low)
             ctx.fillStyle = timeLeft < 30 ? "#ff4444" : "#ffff00"; 
@@ -301,7 +335,7 @@
             
             // Line 3 (Stats)
             ctx.fillStyle = "#ddd";
-            ctx.fillText(`Deepest: ${currentDepth}px  |  Length: ${worm.wormNodes.length}`, 250, 65);
+            ctx.fillText(`Deepest: ${map.lowestDugY}px  |  Length: ${worm.wormNodes.length}`, 250, 65);
         }
         
         function endGame(title, message) {
@@ -318,9 +352,9 @@
             startCard.style.display = 'none';
             
             // 2. Pick a random mission (1 to 3)
-            const randomIndex = Math.floor(Math.random() * missions.length);
+            randomIndex = Math.floor(Math.random() * missions.length);
             const selectedMission = missions[randomIndex];
-
+            
             // 3. Update the Task Card DOM elements
             // We target the h2 and the p tag inside taskCard
             const taskTitle = document.querySelector('#taskCard h2');
@@ -332,7 +366,7 @@
             // 4. Show the Task Card
             taskCard.style.display = 'block';
             
-            let secondsLeft = 15;
+            let secondsLeft = 5;
             
             // 5. Countdown Timer (Targets the countdown inside taskCard)
             const taskCountdown = document.querySelector('#taskCard #countdown');

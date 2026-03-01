@@ -12,6 +12,9 @@ export class Map {
 
     rainTime = 0;
     isRaining = false;
+
+    lowestDugY;
+    highestDugY;
     
     constructor(width, height) {
         this.width = width;
@@ -30,7 +33,7 @@ export class Map {
         // --- 2. STATS (Initialize these OUTSIDE the loop) ---
         this.totalDirtPixels = width * (height - 310);
         this.dirtRemoved = 0;
-        this.lowestDugY = 310; // Start at the surface level
+        
         
         // --- 3. VISUALS ---
         this.shadowCanvas = document.createElement('canvas');
@@ -45,6 +48,8 @@ export class Map {
     
     setPlayer(player){
         this.player = player;
+        this.lowestDugY = player.map_y; // Start at the surface level
+        this.highestDugY = player.map_y;
     }
     
     dig(pos_x, pos_y, radius) { 
@@ -87,6 +92,10 @@ export class Map {
                         // Track Depth
                         if (y > this.lowestDugY) {
                             this.lowestDugY = y;
+                        }
+
+                        if (y < this.highestDugY) {
+                            this.highestDugY = y;
                         }
                     }
                 }
