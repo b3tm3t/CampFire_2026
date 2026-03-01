@@ -84,10 +84,7 @@
                 <strong>Controls</strong><br>
                 WASD or Arrow Keys
             </div>
-            <div>
-                <strong>Objective</strong><br>
-                Clear dirt in 2 Minutes!
-            </div>
+            
         </div>
         
         <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 5...</h3>
@@ -169,7 +166,7 @@
         const rocks = [];
         
         // Create 20 random rocks
-        for(let i = 0; i < 30; i++) {
+        for(let i = 0; i < 60; i++) {
             let rx = Math.random() * worldWidth;
             let ry = Math.random() * (worldHeight - 310) + 310;
             let rSize = Math.random() * 50 + 30;
@@ -177,7 +174,7 @@
         }
         
         // Create Worm (Start length 1)
-        const worm = new Player(700, 400, 5, 30, 100, 1, map);
+        const worm = new Player(700, 400, 5, 30, 100, 3, map);
         map.setPlayer(worm); 
         
         // --- MAIN GAME LOOP ---
