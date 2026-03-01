@@ -81,8 +81,7 @@
         // Input Handling
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
-        
-        
+
         // --- AUDIO SYSTEM ---
         const playlist = [
         './audio/Worm on a roll.mp3',
@@ -112,7 +111,14 @@
             if (true) {
                 // 1. Dig and get the amount
                 // Multiply by 1.5 to make the hole 50% larger than the worm
-                let amountDug = map.dig(worm.map_x, worm.map_y, worm.width * 1.5);
+
+
+                let amountDug = 0
+                
+                for (let i = 0; i < worm.wormNodes.length; i++) {
+                    amountDug += map.dig(worm.wormNodes[i].x, worm.wormNodes[i].y, worm.width/2);
+                }
+                
                 
                 // 2. Feed the worm
                 worm.dirtStomach += amountDug;

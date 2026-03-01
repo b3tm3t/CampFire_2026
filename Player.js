@@ -112,6 +112,8 @@ export class Player {
                 curr.x = prev.x - Math.cos(angle) * spacing;
                 curr.y = prev.y - Math.sin(angle) * spacing;
             }
+
+            //this.wormNodes[i].updatePos();
         }
     }
     
