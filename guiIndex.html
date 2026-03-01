@@ -62,12 +62,20 @@
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
             
-            // C. DRAW
+            // 2. Clamp (Limit) the camera to the World Edges
+            // Left/Top Limit: Cannot go less than 0
+            camX = Math.max(0, camX);
+            camY = Math.max(0, camY);
+            
+            // Right/Bottom Limit: Cannot go past WorldWidth - ScreenWidth
+            camX = Math.min(camX, worldWidth - (mainCanvas.width / zoom));
+            camY = Math.min(camY, worldHeight - (mainCanvas.height / zoom));
+            
+            // C. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
             ctx.save(); // Start Camera
             
-            // This scales EVERYTHING. Player and Map should draw at 1x scale, this makes them 5x.
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
