@@ -32,32 +32,55 @@ export class Map {
         // 2. Fill the whole thing with Brown
         this.shadowCtx.fillStyle = "#8B4513";
         this.shadowCtx.fillRect(0, 310, width, height);
+        // 4. Stats for Depth
+        this.lowestDugY = 310; // Start at the surface level
     }
     
     dig(pos_x, pos_y, radius) { 
-        let dirtDug = 0; // Counter
+        let dirtDug = 0; 
         
-        // 1. Update the Logic Grid & Count Dirt
-        for (let x = -radius; x < radius; x++) {
-            for (let y = -radius; y < radius; y++) { 
-                if ((x ** 2 + y **2 ) ** (1/2) < radius) {
+        // 1. Calculate the area to check (Absolute Coordinates)
+        let startX = Math.floor(pos_x - radius);
+        let endX   = Math.ceil(pos_x + radius);
+        let startY = Math.floor(pos_y - radius);
+        let endY   = Math.ceil(pos_y + radius);
+        
+        // Make sure we don't check outside the map
+        startX = Math.max(0, startX);
+        endX   = Math.min(this.width, endX);
+        startY = Math.max(0, startY);
+        endY   = Math.min(this.height, endY);
+        
+        // 2. Loop through the pixels
+        for (let y = startY; y < endY; y++) {
+            for (let x = startX; x < endX; x++) { 
+                
+                // Check if inside the circle radius
+                let dx = x - pos_x;
+                let dy = y - pos_y;
+                
+                if ((dx * dx + dy * dy) < (radius * radius)) {
                     
-                    // Calculate exact array index
-                    let gridX = Math.floor(pos_x + x);
-                    let gridY = Math.floor(pos_y + y);
-                    let idx = (gridY * this.width) + gridX;
+                    let idx = (y * this.width) + x;
                     
-                    // Only count if we are actually removing DIRT (not empty space)
+                    // Check if there is dirt here
                     if (this.grid[idx] === Map.DIRT) {
-                        this.grid[idx] = Map.NOTHING;
+                        this.grid[idx] = Map.NOTHING; // Remove it
                         dirtDug++; 
-                        this.dirtRemoved++; // <--- Add this line to track global progress 
+                        this.dirtRemoved++; // Track for percentage
+                        
+                        // --- FIX: TRACK DEPTH ---
+                        // Since 'y' is now the absolute coordinate (e.g. 600),
+                        // this check will work correctly.
+                        if (y > this.lowestDugY) {
+                            this.lowestDugY = y;
+                        }
                     }
                 }
             }
         }
         
-        // 2. Update the Visuals
+        // 3. Update the Visuals
         if (dirtDug > 0) {
             this.shadowCtx.globalCompositeOperation = 'destination-out';
             this.shadowCtx.beginPath();
@@ -66,7 +89,7 @@ export class Map {
             this.shadowCtx.globalCompositeOperation = 'source-over';
         }
         
-        return dirtDug; // Send this number back to the game!
+        return dirtDug; 
     }
     
     draw(ctx) {

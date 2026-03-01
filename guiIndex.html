@@ -81,27 +81,27 @@
         // Input Handling
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
-
+        
         
         // --- AUDIO SYSTEM ---
         const playlist = [
-            './audio/Worm on a roll.mp3',
-            './audio/Bloopin.mp3'
+        './audio/Worm on a roll.mp3',
+        './audio/Bloopin.mp3'
         ];
-
+        
         let currentTrack = 0;
         const audioPlayer = new Audio(playlist[currentTrack]);
         audioPlayer.volume = 0.4; // Set a comfortable background volume
-
+        
         function playNextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length; // Cycles back to 0 at the end
             audioPlayer.src = playlist[currentTrack];
             audioPlayer.play().catch(e => console.log("Audio play blocked until interaction"));
         }
-
+        
         // Listen for the end of a track to start the next one
         audioPlayer.addEventListener('ended', playNextTrack);
-    
+        
         
         function gameLoop() {
             // A. UPDATE PHYSICS
@@ -157,11 +157,28 @@
             ctx.restore(); // <--- END CAMERA
             
             // D. HUD
+            // 1. Draw a slightly taller background box (80px height)
             ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(0, 0, mainCanvas.width, 60); 
+            ctx.fillRect(0, 0, mainCanvas.width, 80); 
             
+            // 2. Calculate Stats
+            // Check if map exists to prevent errors
+            let currentDepth = 0;
+            let percentString = "0.00";
+            
+            if (map) {
+                let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
+                percentString = percent.toFixed(2);
+                currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
+            }
+
+            // 3. Draw Text on Two Lines
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
+            
+            // Line 2: Game Stats (at y=65)
+            ctx.fillStyle = "#ffff00"; // Make this line yellow for contrast
+            ctx.fillText(`Deepest: ${currentDepth}px  |  Clear: ${percentString}%`, 20, 65);
             // E. WIN CONDITION
             // Check if 99% of dirt is gone
             if (map.dirtRemoved / map.totalDirtPixels > 0.99) {
@@ -169,14 +186,10 @@
                 return; // Stop the game loop
             }
             
-            // Calculate Percentage
-            let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
-            let percentString = percent.toFixed(2); // Keeps only 2 decimal places (e.g. "1.50")
-            
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             // Update the text to include the percentage
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Dirt Cleared: ${percentString}%`, 20, 40);
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 40);
             
             requestAnimationFrame(gameLoop);
         }
@@ -186,7 +199,7 @@
             mainCanvas.width = window.innerWidth;
             mainCanvas.height = window.innerHeight;
             mainCanvas.style.display = 'block';
-
+            
             audioPlayer.play();
             gameLoop();
         });
