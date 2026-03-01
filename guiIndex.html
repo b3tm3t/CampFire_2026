@@ -52,7 +52,7 @@
         const map = new Map(worldWidth, worldHeight); 
         
         // --- FIX: Start Length is now 1 ---
-        const worm = new Player(700, 400, 5, 30, 100, 1, map);
+        const worm = new Player(700, 400, 4, 30, 100, 1, map);
         map.setPlayer(worm); 
         
         // Input Handling
@@ -80,14 +80,20 @@
         function gameLoop() {
             // A. UPDATE PHYSICS
             worm.calculateAngle(keys);
-            worm.calculateVelocity(keys);
-            worm.updatePos(worldWidth, worldHeight); 
+            
+
+            let dirtDug = 0;
+            for (let i = 0; i < worm.wormNodes.length; i++) {
+                dirtDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
+            }
+
+            worm.calculateVelocity(keys, dirtDug);
+            worm.updatePos(worldWidth, worldHeight, dirtDug); 
             
             // B. DIGGING LOGIC
             // Dig at every node position
-            for (let i = 0; i < worm.wormNodes.length; i++) {
-                map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
-            }
+
+            
             
             // --- FIX: PERCENTAGE BASED GROWTH ---
             // Calculate current percentage
@@ -126,7 +132,7 @@
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
 
-            // RAIN LOGIC
+            // RAIN LOGICa
             if (Math.random() < 0.0002) { 
                 map.startRain();
             }

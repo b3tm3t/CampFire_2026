@@ -76,9 +76,7 @@ export class Map {
                     if (this.grid[idx] === Map.DIRT) {
                         
                         // --- FIX IS HERE: Use 'this.player' ---
-                        if(this.player) {
-                            this.player.velocityDampened = true; 
-                        }
+                        
                         
                         this.grid[idx] = Map.NOTHING; // Remove it
                         dirtDug++; 
@@ -89,6 +87,7 @@ export class Map {
                             this.lowestDugY = y;
                         }
                     }
+
                 }
             }
         }

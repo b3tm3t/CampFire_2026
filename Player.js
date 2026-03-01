@@ -7,20 +7,19 @@ export class Player {
     map_y = 0;
     
     // Movement Properties
-    speed = 0;
+    maxSpeed = 0;
     width = 0;
     currentAngle = 0;
     health = 0;
-    velocityDampened = false;
     
     angleTurning = 6; 
     forwardVelocity = 0;
     tempVel = 0;
     
-    constructor(map_x, map_y, speed, width, health, length, map) {
+    constructor(map_x, map_y, maxSpeed, width, health, length, map) {
         this.map_x = map_x;
         this.map_y = map_y;
-        this.speed = speed;
+        this.maxSpeed = maxSpeed;
         this.width = width;
         this.health = health;
         this.length = length;
@@ -37,7 +36,7 @@ export class Player {
         let left  = input.ArrowLeft  || input.a;
         let down  = input.ArrowDown  || input.s;
         let up    = input.ArrowUp    || input.w;
-        
+
         let dx = (right ? 1 : 0) - (left ? 1 : 0);
         let dy = (down ? 1 : 0) - (up ? 1 : 0);
         
@@ -58,21 +57,17 @@ export class Player {
         }
     }
     
-    calculateVelocity(input) {
+    calculateVelocity(input, dirtDug) {
         let isMoving = input.ArrowRight || input.d || input.ArrowLeft || input.a || 
         input.ArrowDown || input.s || input.ArrowUp || input.w;
         
         if (isMoving) {
-            this.tempVel += 0.5; 
+            this.forwardVelocity += 0.5; 
         } else {
-            this.tempVel *= 0.9; 
+            this.forwardVelocity -= 0.5; 
         }
-        if (this.velocityDampened) {
-            this.forwardVelocity = this.tempVel * 0.1;
-        } else {
-            this.forwardVelocity = this.tempVel;
-        }
-        this.forwardVelocity = Math.max(0, Math.min(this.speed, this.forwardVelocity));
+        
+        this.forwardVelocity = Math.max(0, Math.min(this.maxSpeed, this.forwardVelocity - dirtDug/150)); 
     }
     
     updatePos(worldWidth, worldHeight) { 
