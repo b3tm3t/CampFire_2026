@@ -11,7 +11,7 @@ export class Player {
     currentAngle = 0;
     health = 0;
     
-    angleTurning = 3; 
+    angleTurning = 6; 
     forwardVelocity = 0;
     secondsSurvived = 0;
     

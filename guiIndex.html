@@ -81,6 +81,27 @@
         // Input Handling
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+        
+        // --- AUDIO SYSTEM ---
+        const playlist = [
+            './audio/Worm on a roll.mp3',
+            './audio/Bloopin.mp3'
+        ];
+
+        let currentTrack = 0;
+        const audioPlayer = new Audio(playlist[currentTrack]);
+        audioPlayer.volume = 0.4; // Set a comfortable background volume
+
+        function playNextTrack() {
+            currentTrack = (currentTrack + 1) % playlist.length; // Cycles back to 0 at the end
+            audioPlayer.src = playlist[currentTrack];
+            audioPlayer.play().catch(e => console.log("Audio play blocked until interaction"));
+        }
+
+        // Listen for the end of a track to start the next one
+        audioPlayer.addEventListener('ended', playNextTrack);
+    
         
         function gameLoop() {
             // A. UPDATE PHYSICS
@@ -165,6 +186,8 @@
             mainCanvas.width = window.innerWidth;
             mainCanvas.height = window.innerHeight;
             mainCanvas.style.display = 'block';
+
+            audioPlayer.play();
             gameLoop();
         });
         
