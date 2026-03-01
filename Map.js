@@ -1,43 +1,48 @@
+import { Player } from "./Player.js";
+
 export class Map {
+    player;
     // Materials
     static NOTHING = 0;
     static DIRT = 1;
     
     static cameraScale = 3; 
-
-    rainLevel;
-
-    isRaining;
+    
+    rainLevel = 0;
+    isRaining = false;
     
     constructor(width, height) {
         this.width = width;
         this.height = height;
         this.cameraScale = Map.cameraScale;
-        // --- FIX: CREATE THE LOGIC GRID ---
+        
+        // --- 1. LOGIC GRID ---
         this.grid = new Int8Array(width * height);
         this.grid.fill(1); // Fill everything with dirt (1) initially
         
         // Clear the sky (top 310 pixels) so we don't dig air
         for(let i = 0; i < width * 310; i++) {
             this.grid[i] = Map.NOTHING;
-            // 3. Stats for Percentage
-            // Total area minus the sky area (310px height)
-            this.totalDirtPixels = width * (height - 310);
-            this.dirtRemoved = 0;
         }
         
-        // 1. Visual Buffer (The "Shadow Canvas")
-        // This acts as a permanent layer we draw ONCE and then update
+        // --- 2. STATS (Initialize these OUTSIDE the loop) ---
+        this.totalDirtPixels = width * (height - 310);
+        this.dirtRemoved = 0;
+        this.lowestDugY = 310; // Start at the surface level
+        
+        // --- 3. VISUALS ---
         this.shadowCanvas = document.createElement('canvas');
         this.shadowCanvas.width = width;
         this.shadowCanvas.height = height;
         this.shadowCtx = this.shadowCanvas.getContext('2d');
         
-        // 2. Fill the whole thing with Brown
+        // Fill the whole thing with Brown
         this.shadowCtx.fillStyle = "#8B4513";
         this.shadowCtx.fillRect(0, 310, width, height);
-        // 4. Stats for Depth
-        this.lowestDugY = 310; // Start at the surface level
+    }
+    
+    setPlayer(player){
+        this.player = player;
     }
     
     dig(pos_x, pos_y, radius) { 
@@ -69,14 +74,17 @@ export class Map {
                     
                     // Check if there is dirt here
                     if (this.grid[idx] === Map.DIRT) {
-                        Worm.velocityDampened = true; // Dampen velocity when digging
+                        
+                        // --- FIX IS HERE: Use 'this.player' ---
+                        if(this.player) {
+                            this.player.velocityDampened = true; 
+                        }
+                        
                         this.grid[idx] = Map.NOTHING; // Remove it
                         dirtDug++; 
                         this.dirtRemoved++; // Track for percentage
                         
-                        // --- FIX: TRACK DEPTH ---
-                        // Since 'y' is now the absolute coordinate (e.g. 600),
-                        // this check will work correctly.
+                        // Track Depth
                         if (y > this.lowestDugY) {
                             this.lowestDugY = y;
                         }
@@ -98,23 +106,21 @@ export class Map {
     }
     
     draw(ctx, worldWidth) {
-        // We just draw the image we created in the constructor
-        // Because index.html handles the Zoom/Camera, we just draw at 0,0
-
-        if (this.isRaining) {
-            ctx.fillRect(0, this.rainLevel, worldWidth, this.lowestDugY);
-        }
-        
+        // Draw the dirt map
         ctx.drawImage(this.shadowCanvas, 0, 0);
+        
+        // Draw Rain (if active)
+        if (this.isRaining) {
+            ctx.fillStyle = "rgba(0, 0, 255, 0.3)"; // Semi-transparent blue
+            // Draw a rectangle from the sky down to the rain level
+            ctx.fillRect(0, 0, worldWidth, this.rainLevel);
+        }
     }
-
+    
     startRain() {
-        this.rainLevel = this.lowestDugY;
-        this.isRaining = true;
+        if (!this.isRaining) {
+            this.rainLevel = 0; // Start rain at top
+            this.isRaining = true;
+        }
     }
-
-    getRandomArbitrary(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-
 }

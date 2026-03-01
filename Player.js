@@ -27,12 +27,8 @@ export class Player {
         this.length = length;
         this.map = map;
         
-        this.wormNodes = new Array(1);
-        
-        
-        this.dirtStomach = 0; // Tracks how much dirt we've eaten
-        this.growthThreshold = 23840; // How much dirt equals 1 new segment 
-        // 
+        this.dirtStomach = 0; 
+        this.growthThreshold = 23840; 
         
         this.wormNodes = []; 
         for (let i = 0; i < this.length; i++) {
@@ -84,7 +80,7 @@ export class Player {
         this.forwardVelocity = Math.max(0, Math.min(this.speed, this.forwardVelocity));
     }
     
-    updatePos(worldWidth, worldHeight) { // Update this worm's thing, as well as the other nodes' colors and positions
+    updatePos(worldWidth, worldHeight) { 
         let r = this.width / 2; 
         let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity;
         let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity;
@@ -105,7 +101,6 @@ export class Player {
             let prev = this.wormNodes[i - 1];
             let curr = this.wormNodes[i];
             
-            // Accessing .pos_x and .pos_y instead of .x and .y
             let dx = prev.pos_x - curr.pos_x;
             let dy = prev.pos_y - curr.pos_y;
             let angle = Math.atan2(dy, dx);
@@ -115,28 +110,23 @@ export class Player {
                 curr.pos_x = prev.pos_x - Math.cos(angle) * spacing;
                 curr.pos_y = prev.pos_y - Math.sin(angle) * spacing;
             }
-
-            // 3. Call the Node's own update method to handle its segment logic
+            
             curr.update();
         }
     }   
     
     draw(ctx) { 
-
-        console.log("Length:", this.wormNodes.length)
-        for (let i = this.wormNodes.length - 1; i >= 0; i--) { // Draw starting from backwards
+        // Draw starting from backwards
+        for (let i = this.wormNodes.length - 1; i >= 0; i--) { 
             let node = this.wormNodes[i];
             
             ctx.save();
+            // Move pen to the node location
             ctx.translate(node.pos_x, node.pos_y);
             
             ctx.beginPath();
-            // 4. Use node.width (calculated by Node logic) instead of this.width
             ctx.arc(0, 0, node.width, 0, Math.PI * 2);
-
             
-            
-            // 5. Use node.color (assigned in Node logic) or keep player colors
             ctx.fillStyle = node.color; 
             ctx.fill();
             
@@ -157,21 +147,20 @@ export class Player {
                 ctx.lineWidth = 1;
                 ctx.strokeRect(-25, -40, 50, 6);
             }
-
-            ctx.fillStyle = "black";
-            ctx.fillText(node.referenceSegment, node.pos_x, node.pos_y, 100)
+            
+            // FIX: Draw text at 0,0 because we already translated context to the node position
+            if (node.referenceSegment) {
+                ctx.fillStyle = "black";
+                // ctx.fillText(Math.floor(node.referenceSegment), 0, 0); 
+            }
             
             ctx.restore();
-
-            
         }
-
     }        
     grow() {
-    let tail = this.wormNodes[this.wormNodes.length - 1];
-    // Use the current length as the new node's index
-    let newNode = new Node(tail.pos_x, tail.pos_y, this.wormNodes.length - 1, this);
-    this.wormNodes.push(newNode);
-    this.length = this.wormNodes.length;
-}
+        let tail = this.wormNodes[this.wormNodes.length - 1];
+        let newNode = new Node(tail.pos_x, tail.pos_y, this.wormNodes.length, this);
+        this.wormNodes.push(newNode);
+        this.length = this.wormNodes.length;
+    }
 }

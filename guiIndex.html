@@ -41,8 +41,7 @@
         // --- 1. WORLD SETTINGS ---
         const worldWidth = 3200;
         const worldHeight = 1800;
-
-        // (Game ticks)
+        
         let ticks = 0;
         
         // --- 2. LOAD ASSETS ---
@@ -50,10 +49,11 @@
         backgroundImage.src = "./BackdropWormGame.png";
         
         // --- 3. CREATE OBJECTS ---
-        // FIX 1: Pass worldWidth/Height so the map covers the whole world!
         const map = new Map(worldWidth, worldHeight); 
         
-        const worm = new Player(700, 400, 5, 30, 100, 1, map);
+        // Start length 30, but pass map
+        const worm = new Player(700, 400, 5, 1, 100, 30, map);
+        map.setPlayer(worm); 
         
         // Input Handling
         window.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -67,15 +67,13 @@
         
         let currentTrack = 0;
         const audioPlayer = new Audio(playlist[currentTrack]);
-        audioPlayer.volume = 0.4; // Set a comfortable background volume
+        audioPlayer.volume = 0.4; 
         
         function playNextTrack() {
-            currentTrack = (currentTrack + 1) % playlist.length; // Cycles back to 0 at the end
+            currentTrack = (currentTrack + 1) % playlist.length;
             audioPlayer.src = playlist[currentTrack];
             audioPlayer.play().catch(e => console.log("Audio play blocked until interaction"));
         }
-        
-        // Listen for the end of a track to start the next one
         audioPlayer.addEventListener('ended', playNextTrack);
         
         
@@ -84,28 +82,25 @@
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
-            // FIX 2: DIGGING & GROWTH LOGIC
-            if (true) {
-                // 1. Dig and get the amount
-                // Multiply by 1.5 to make the hole 50% larger than the worm
-                
-                
-                let amountDug = 0
-                
-                for (let i = 0; i < worm.wormNodes.length; i++) {
-                    amountDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
-                }
-                
-                // 2. Feed the worm
-                worm.dirtStomach += amountDug;
-                
-                // 3. Check if ready to grow
-                if (worm.dirtStomach > worm.growthThreshold) {
-                    worm.grow();
-                    worm.dirtStomach = 0; // Reset stomach
-                    console.log("Worm grew! Length: " + worm.wormNodes.length);
-                }
+            
+            // FIX: Digging
+            // Only dig if we are moving? Or always?
+            // Current: Always digs
+            let amountDug = 0;
+            
+            for (let i = 0; i < worm.wormNodes.length; i++) {
+                // Dig using the node's position
+                amountDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
             }
+            
+            worm.dirtStomach += amountDug;
+            
+            if (worm.dirtStomach > worm.growthThreshold) {
+                worm.grow();
+                worm.dirtStomach = 0; 
+                console.log("Worm grew! Length: " + worm.wormNodes.length);
+            }
+            
             
             // B. CAMERA LOGIC
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
@@ -122,38 +117,37 @@
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
-            // Draw Background (The image behind the dirt)
+            // Draw Background
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
-                ctx.fillStyle = "#333"; // Fallback dark grey background
+                ctx.fillStyle = "#333";
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
-
-            if (Math.random() * 5000 + 20000) {
+            
+            // --- FIX RAIN LOGIC ---
+            // 1 in 5000 chance per frame
+            if (Math.random() < 0.0002) { 
                 map.startRain();
             }
-
+            
             if (map.isRaining) {
-                map.rainLevel++;
+                map.rainLevel += 5; // Rain falls down
+                // Stop rain if it hits bottom
+                if (map.rainLevel > worldHeight) {
+                    map.isRaining = false;
+                }
             }
-
             
-            // Draw Map (The Dirt)
             map.draw(ctx, worldWidth);
-            
-            // Draw Worm
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA
             
             // D. HUD
-            // 1. Draw a slightly taller background box (80px height)
             ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, mainCanvas.width, 80); 
             
-            // 2. Calculate Stats
-            // Check if map exists to prevent errors
             let currentDepth = 0;
             let percentString = "0.00";
             
@@ -163,33 +157,27 @@
                 currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
             }
             
-            // 3. Draw Text on Two Lines
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             
-            // Line 2: Game Stats (at y=65)
-            ctx.fillStyle = "#ffff00"; // Make this line yellow for contrast
+            ctx.fillStyle = "#ffff00"; 
             ctx.fillText(`Deepest: ${currentDepth}px  |  Clear: ${percentString}%`, 20, 65);
-            // E. WIN CONDITION
-            // Check if 99% of dirt is gone
+            
             if (map.dirtRemoved / map.totalDirtPixels > 0.99) {
                 document.getElementById('winCard').style.display = 'block';
-                return; // Stop the game loop
+                return; 
             }
-
-            map.cameraScale = Math.max(3 - worm.length/10, 1.2);
+            
+            // Dynamic Camera Zoom
+            map.cameraScale = Math.max(3 - worm.length/50, 1.2); // Slowed down zoom change
             
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            // Update the text to include the percentage
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 40);
             
             requestAnimationFrame(gameLoop);
-
-            ticks++;
-
             
-
+            ticks++;
         }
         
         myButton.addEventListener('click', () => {
@@ -208,8 +196,6 @@
                 mainCanvas.height = window.innerHeight;
             }
         });
-
-        
     </script>
 </body>
 </html>
