@@ -88,7 +88,7 @@
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
             // FIX 2: DIGGING & GROWTH LOGIC
-            if (keys[' ']) {
+            if (true) {
                 // 1. Dig and get the amount
                 // Multiply by 1.5 to make the hole 50% larger than the worm
                 let amountDug = map.dig(worm.map_x, worm.map_y, worm.width * 1.5);
@@ -155,7 +155,7 @@
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             // Update the text to include the percentage
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Dirt Cleared: ${percentString}% | Press SPACE to Dig`, 20, 40);
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Dirt Cleared: ${percentString}%`, 20, 40);
             
             requestAnimationFrame(gameLoop);
         }

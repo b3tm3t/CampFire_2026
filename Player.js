@@ -160,7 +160,7 @@ export class Player {
             
             ctx.restore();
         }
-    }
+    }        
     grow() {
         // 1. Find the very last node (the tail)
         let tail = this.wormNodes[this.wormNodes.length - 1];
