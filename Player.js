@@ -1,4 +1,3 @@
-import { Node } from './Node.js';
 import { Map } from './Map.js';
 
 export class Player {
@@ -28,10 +27,10 @@ export class Player {
         this.wormNodes = new Array(1);
         this.wormNodes=[]; 
         for (let i=0; i<this.length; i++){
-            this.wormNodes.push(new Node(this.map_x, this.map_y, this.width, this));
+            this.wormNodes.push({ x: this.map_x, y: this.map_y });
         } 
         this.dirtStomach = 0; // Tracks how much dirt we've eaten
-        this.growthThreshold = 200; // How much dirt equals 1 new segment 
+        this.growthThreshold = 2000; // How much dirt equals 1 new segment 
     }
     
     calculateAngle(input) { 

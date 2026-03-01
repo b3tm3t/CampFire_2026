@@ -9,6 +9,14 @@ export class Map {
         this.width = width;
         this.height = height;
         this.cameraScale = Map.cameraScale;
+        // --- FIX: CREATE THE LOGIC GRID ---
+        this.grid = new Int8Array(width * height);
+        this.grid.fill(1); // Fill everything with dirt (1) initially
+        
+        // Clear the sky (top 310 pixels) so we don't dig air
+        for(let i = 0; i < width * 310; i++) {
+            this.grid[i] = Map.NOTHING;
+        }
 
         // 1. Visual Buffer (The "Shadow Canvas")
         // This acts as a permanent layer we draw ONCE and then update
