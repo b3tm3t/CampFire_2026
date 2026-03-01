@@ -14,7 +14,9 @@ export class Player {
     
     angleTurning = 6; 
     forwardVelocity = 0;
-    tempVel = 0;
+    
+    // --- NEW: Cooldown to prevent instant death ---
+    damageCooldown = 0;
     
     constructor(map_x, map_y, maxSpeed, width, health, length, map) {
         this.map_x = map_x;
@@ -36,7 +38,7 @@ export class Player {
         let left  = input.ArrowLeft  || input.a;
         let down  = input.ArrowDown  || input.s;
         let up    = input.ArrowUp    || input.w;
-
+        
         let dx = (right ? 1 : 0) - (left ? 1 : 0);
         let dy = (down ? 1 : 0) - (up ? 1 : 0);
         
@@ -67,16 +69,58 @@ export class Player {
             this.forwardVelocity -= 0.5; 
         }
         
+        // Your logic for dirt friction:
+        // Change /150 to /1000
         this.forwardVelocity = Math.max(0, Math.min(this.maxSpeed, this.forwardVelocity - dirtDug/150)); 
     }
     
-    updatePos(worldWidth, worldHeight) { 
+    // --- UPDATED: Now accepts 'rocks' to check collisions ---
+    updatePos(worldWidth, worldHeight, rocks) { 
         let r = this.width / 2; 
+        
+        // 1. Calculate projected position
         let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity;
         let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity;
         
-        if (nextX > r && nextX < worldWidth - r) { this.map_x = nextX; }
-        if (nextY > (310 + r) && nextY < worldHeight - r) { this.map_y = nextY; }
+        // 2. Reduce damage cooldown
+        if (this.damageCooldown > 0) this.damageCooldown--;
+        
+        // 3. Check Rock Collisions
+        let hitRock = false;
+        
+        // Only check collision if rocks exist
+        if (rocks && rocks.length > 0) {
+            for (let rock of rocks) {
+                let dx = nextX - rock.x;
+                let dy = nextY - rock.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                
+                // Collision check (Rock Radius + Worm Radius)
+                if (dist < (rock.size + r)) {
+                    hitRock = true;
+                    
+                    // Take Damage
+                    if (this.damageCooldown === 0) {
+                        this.health -= 20; 
+                        console.log("Ouch! Health:", this.health);
+                        this.damageCooldown = 60; // 1 second invulnerability
+                        
+                        // Bounce back effect
+                        this.forwardVelocity = -2; 
+                    }
+                    break; 
+                }
+            }
+        }
+        
+        // 4. Move only if safe
+        if (!hitRock) {
+            if (nextX > r && nextX < worldWidth - r) { this.map_x = nextX; }
+            if (nextY > (310 + r) && nextY < worldHeight - r) { this.map_y = nextY; }
+        } else {
+            // Stop forward movement if hitting a rock
+            if (this.forwardVelocity > 0) this.forwardVelocity = 0;
+        }
         
         // Sync Head Node
         if(this.wormNodes[0]) {
@@ -100,7 +144,7 @@ export class Player {
                 curr.pos_x = prev.pos_x - Math.cos(angle) * spacing;
                 curr.pos_y = prev.pos_y - Math.sin(angle) * spacing;
             }
-
+            
             curr.update();
         }
     }   
@@ -115,7 +159,15 @@ export class Player {
             
             ctx.beginPath();
             ctx.arc(0, 0, node.width, 0, Math.PI * 2);
-            ctx.fillStyle = node.color; 
+            
+            // --- UPDATED: Visual feedback for damage ---
+            // If cooldown is active and this is the head (i===0), draw white
+            if (this.damageCooldown > 0 && i === 0) {
+                ctx.fillStyle = "white"; 
+            } else {
+                ctx.fillStyle = node.color; 
+            }
+            
             ctx.fill();
             
             if (i === 0) { 
@@ -126,9 +178,10 @@ export class Player {
                 ctx.fillRect(5, 5, 5, 5);  
                 ctx.restore(); 
                 
+                // Health Bar
                 ctx.fillStyle = "red";
                 ctx.fillRect(-25, -40, 50, 6);
-                let hpPercent = this.health / 100; 
+                let hpPercent = Math.max(0, this.health / 100); 
                 ctx.fillStyle = "#00ff00";
                 ctx.fillRect(-25, -40, 50 * hpPercent, 6);
                 ctx.strokeStyle = "black";
@@ -139,15 +192,14 @@ export class Player {
             ctx.restore();
         }
     }        
-
+    
     grow() {
         let tail = this.wormNodes[this.wormNodes.length - 1];
         // Create new node at the tail's position
-        // The index is the current length
         let newNode = new Node(tail.pos_x, tail.pos_y, this.wormNodes.length, this);
         this.wormNodes.push(newNode);
         
         // Update length property
         this.length = this.wormNodes.length;
     }
-}
+}   
