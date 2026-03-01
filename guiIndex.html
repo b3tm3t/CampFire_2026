@@ -135,7 +135,18 @@
             
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Press SPACE to Dig`, 20, 40);
+            // D. HUD
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(0, 0, mainCanvas.width, 60); 
+            
+            // Calculate Percentage
+            let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
+            let percentString = percent.toFixed(2); // Keeps only 2 decimal places (e.g. "1.50")
+            
+            ctx.fillStyle = "white";
+            ctx.font = "20px sans-serif";
+            // Update the text to include the percentage
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Dirt Cleared: ${percentString}% | Press SPACE to Dig`, 20, 40);
             
             requestAnimationFrame(gameLoop);
         }
