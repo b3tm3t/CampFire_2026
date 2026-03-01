@@ -52,10 +52,9 @@
     
     <script type="module">
         import { Player } from './Player.js';
-        import { Map } from './Map.js'; // Assuming you have this file
+        import { Map } from './Map.js'; 
         
         const myButton = document.getElementById('startBtn');
-        const myTitle = document.getElementById('message');
         const mainCanvas = document.getElementById('gameCanvas');
         const ctx = mainCanvas.getContext('2d');
         const keys = {};
@@ -69,9 +68,9 @@
         backgroundImage.src = "./BackdropWormGame.png";
         
         // --- 3. CREATE OBJECTS ---
-        const map = new Map(300, 125); // Dummy map object per your code
+        // FIX 1: Pass worldWidth/Height so the map covers the whole world!
+        const map = new Map(worldWidth, worldHeight); 
         
-        // Player starts at (700, 400)
         const worm = new Player(700, 400, 5, 30, 100, 1, map);
         
         // Input Handling
@@ -83,24 +82,19 @@
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
+
+            // FIX 2: TRIGGER THE DIGGING
+            // If Spacebar is pressed, dig a hole at the worm's position
+            if (keys[' ']) {
+                map.dig(worm.map_x, worm.map_y, worm.width);
+            }
             
             // B. CAMERA LOGIC
-            // FIXED: Changed worm.pos_x to worm.map_x (The variable that actually exists)
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
-            // Clamp camera to world edges
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
-            
-            // 2. Clamp (Limit) the camera to the World Edges
-            // Left/Top Limit: Cannot go less than 0
-            camX = Math.max(0, camX);
-            camY = Math.max(0, camY);
-            
-            // Right/Bottom Limit: Cannot go past WorldWidth - ScreenWidth
-            camX = Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale));
-            camY = Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale));
             
             // C. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
@@ -110,35 +104,29 @@
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
-            // Draw Background
+            // Draw Background (The image behind the dirt)
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
-                // Fallback Grid
-                ctx.strokeStyle = "#444";
-                ctx.lineWidth = 5;
-                ctx.strokeRect(0, 0, worldWidth, worldHeight);
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                for(let i=0; i<worldWidth; i+=200) { ctx.moveTo(i,0); ctx.lineTo(i, worldHeight); }
-                for(let i=0; i<worldHeight; i+=200) { ctx.moveTo(0,i); ctx.lineTo(worldWidth, i); }
-                ctx.stroke();
+                ctx.fillStyle = "#333"; // Fallback dark grey background
+                ctx.fillRect(0,0, worldWidth, worldHeight);
             }
             
+            // Draw Map (The Dirt)
             map.draw(ctx);
+            
+            // Draw Worm
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA
             
-            // D. HUD (Fixed on screen)
-            // Draw the Top UI Bar area (Where the player can't go)
+            // D. HUD
             ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(0, 0, mainCanvas.width, 60); // Simple visual bar
+            ctx.fillRect(0, 0, mainCanvas.width, 60); 
 
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            // Fixed HUD variable names too
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)}`, 20, 40);
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Press SPACE to Dig`, 20, 40);
             
             requestAnimationFrame(gameLoop);
         }
