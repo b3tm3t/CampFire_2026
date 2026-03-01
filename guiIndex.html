@@ -51,8 +51,10 @@
             // Text displays
             ctx.fillStyle = "white";
             ctx.font = "24px sans-serif";
-            ctx.fillText(`Angle: ${worm.currentAngle.toFixed(2)}`, 20, 40);
+            ctx.fillText(`Angle: ${worm.currentAngle.toFixed(2) * 180/ Math.PI}`, 20, 40);
             ctx.fillText(`Velocity: ${worm.forwardVelocity}`, 20, 70);
+
+            ctx.fillText(`Desired angle: ${worm.desiredAngle.toFixed(2)}`, 20, 100);
             
             requestAnimationFrame(gameLoop);
         }
