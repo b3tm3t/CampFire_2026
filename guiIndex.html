@@ -71,12 +71,12 @@
         <button id="startBtn">Start Mission</button>
     </div>
     
-    <div id="instructionCard" class="card" style="display: none;">
+    <div id="taskCard" class="card" style="display: none;">
         <h2 style="color: #2ecc71;">Mission Briefing</h2>
         
         <div style="text-align: left; margin: 20px 0; font-size: 1rem;">
             <p><strong>The Story:</strong> The world's soil is toxic because humans are... well, pooping too much. The ecosystem is collapsing.</p>
-            <p><strong>Your Job:</strong> You are the last hope. You must eat the toxic dirt to expose the fresh, revitalized soil underneath. Do it quickly before the toxicity spreads!</p>
+            
         </div>
         
         <div class="info-box">
@@ -106,9 +106,25 @@
         import { Map } from './Map.js';
         import { Rock } from './Rock.js';
         
+
+        const missions = [
+            {
+                title: "Deep Sea Excavation",
+                text: "The lower layers are densest. Tunnel down to 1000px and clear the toxic core!"
+            },
+            {
+                title: "Surface Sweep",
+                text: "The topsoil is clogging up. Stay high and clear 10% of the upper layer quickly!"
+            },
+            {
+                title: "Rocky Recovery",
+                text: "The rocks are leaching chemicals. Dig around at least 15 rocks to neutralize them!"
+            }
+        ];
+
         // --- DOM ELEMENTS ---
         const startCard = document.getElementById('startCard');
-        const instructionCard = document.getElementById('instructionCard');
+        const taskCard = document.getElementById('taskCard');
         const countdownText = document.getElementById('countdown');
         const endCard = document.getElementById('endCard');
         const startBtn = document.getElementById('startBtn');
@@ -300,32 +316,44 @@
             // 1. Hide Start Menu
             startCard.style.display = 'none';
             
-            // 2. Show Instructions
-            instructionCard.style.display = 'block';
+            // 2. Pick a random mission (1 to 3)
+            const randomIndex = Math.floor(Math.random() * missions.length);
+            const selectedMission = missions[randomIndex];
+
+            // 3. Update the Task Card DOM elements
+            // We target the h2 and the p tag inside taskCard
+            const taskTitle = document.querySelector('#taskCard h2');
+            const taskDescription = document.querySelector('#taskCard p strong');
+            
+            taskTitle.innerText = `Mission: ${selectedMission.title}`;
+            taskDescription.parentElement.innerHTML = `<strong>The Goal:</strong> ${selectedMission.text}`;
+            
+            // 4. Show the Task Card
+            taskCard.style.display = 'block';
             
             let secondsLeft = 15;
             
-            // 3. Countdown Timer
+            // 5. Countdown Timer (Targets the countdown inside taskCard)
+            const taskCountdown = document.querySelector('#taskCard #countdown');
+            
             const timerInterval = setInterval(() => {
                 secondsLeft--;
-                countdownText.innerText = `Starting in ${secondsLeft}...`;
+                taskCountdown.innerText = `Starting in ${secondsLeft}...`;
                 
                 if (secondsLeft <= 0) {
                     clearInterval(timerInterval);
                     
-                    // 4. Start Game
-                    instructionCard.style.display = 'none';
+                    taskCard.style.display = 'none';
                     mainCanvas.style.display = 'block';
                     mainCanvas.width = window.innerWidth;
                     mainCanvas.height = window.innerHeight;
                     
                     isGameRunning = true;
-                    audioPlayer.play().catch(e => console.log("Audio needs user interaction"));
+                    audioPlayer.play().catch(e => console.log("Audio interaction blocked"));
                     gameLoop();
                 }
             }, 1000);
         });
-        
         window.addEventListener('resize', () => {
             if (mainCanvas.style.display === 'block') {
                 mainCanvas.width = window.innerWidth;
