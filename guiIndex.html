@@ -82,11 +82,20 @@
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
-
-            // FIX 2: TRIGGER THE DIGGING
-            // If Spacebar is pressed, dig a hole at the worm's position
+            // FIX 2: DIGGING & GROWTH LOGIC
             if (keys[' ']) {
-                map.dig(worm.map_x, worm.map_y, worm.width);
+                // 1. Dig and get the amount
+                let amountDug = map.dig(worm.map_x, worm.map_y, worm.width);
+                
+                // 2. Feed the worm
+                worm.dirtStomach += amountDug;
+                
+                // 3. Check if ready to grow
+                if (worm.dirtStomach > worm.growthThreshold) {
+                    worm.grow();
+                    worm.dirtStomach = 0; // Reset stomach
+                    console.log("Worm grew! Length: " + worm.wormNodes.length);
+                }
             }
             
             // B. CAMERA LOGIC
@@ -123,7 +132,7 @@
             // D. HUD
             ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, mainCanvas.width, 60); 
-
+            
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Press SPACE to Dig`, 20, 40);
@@ -138,7 +147,7 @@
             mainCanvas.style.display = 'block';
             gameLoop();
         });
-
+        
         window.addEventListener('resize', () => {
             if (mainCanvas.style.display === 'block') {
                 mainCanvas.width = window.innerWidth;

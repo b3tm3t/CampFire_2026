@@ -23,12 +23,37 @@ export class Map {
     }
 
     dig(pos_x, pos_y, radius) { 
-        // VISUAL UPDATE: Cut a hole in the image
-        this.shadowCtx.globalCompositeOperation = 'destination-out'; // "Eraser Mode"
-        this.shadowCtx.beginPath();
-        this.shadowCtx.arc(pos_x, pos_y, radius, 0, Math.PI * 2);
-        this.shadowCtx.fill();
-        this.shadowCtx.globalCompositeOperation = 'source-over'; // Reset to "Drawing Mode"
+        let dirtDug = 0; // Counter
+
+        // 1. Update the Logic Grid & Count Dirt
+        for (let x = -radius; x < radius; x++) {
+            for (let y = -radius; y < radius; y++) { 
+                if ((x ** 2 + y **2 ) ** (1/2) < radius) {
+                    
+                    // Calculate exact array index
+                    let gridX = Math.floor(pos_x + x);
+                    let gridY = Math.floor(pos_y + y);
+                    let idx = (gridY * this.width) + gridX;
+
+                    // Only count if we are actually removing DIRT (not empty space)
+                    if (this.grid[idx] === Map.DIRT) {
+                        this.grid[idx] = Map.NOTHING;
+                        dirtDug++; 
+                    }
+                }
+            }
+        }
+
+        // 2. Update the Visuals
+        if (dirtDug > 0) {
+            this.shadowCtx.globalCompositeOperation = 'destination-out';
+            this.shadowCtx.beginPath();
+            this.shadowCtx.arc(pos_x, pos_y, radius, 0, Math.PI * 2);
+            this.shadowCtx.fill();
+            this.shadowCtx.globalCompositeOperation = 'source-over';
+        }
+
+        return dirtDug; // Send this number back to the game!
     }
 
     draw(ctx) {
