@@ -93,7 +93,9 @@ export class Player {
         ctx.rotate(this.currentAngle);
 
         ctx.fillStyle = "#2ecc71"; 
-        ctx.fillRect(-this.width / 2, -this.width / 2, this.width, this.width);
+        ctx.beginPath();
+        ctx.arc(0, 0, this.width / 2, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.fillStyle = "black";
         ctx.fillRect(5, -5, 5, 5);
