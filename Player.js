@@ -29,8 +29,6 @@ export class Player {
         this.width = width;
 
         this.health = health;
-
-        this.speed = 0;
         
         this.wormNodes = new Array(1);
 
