@@ -1,12 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Worm Game 3</title>
+    <title>Worm Game Final</title>
     <style>
-        body {font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f3; margin: 0; overflow: hidden;}
-        .card {background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); text-align: center; position: absolute; z-index: 10;}
-        button {padding: 10px 20px; cursor: pointer; background: #2ecc71; color: white; border: none; border-radius: 5px; font-size: 1.1rem;}
-        button:hover {background: #27ae60}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #eef2f3;
+            margin: 0;
+            overflow: hidden;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: absolute;
+            z-index: 10;
+            max-width: 600px;
+            width: 90%;
+        }
+        h1, h2, h3 { margin-top: 0; }
+        p { line-height: 1.6; color: #555; }
+        
+        button {
+            padding: 15px 30px;
+            cursor: pointer;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
+        }
+        button:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-around;
+        }
+
         canvas { 
             background: #222; 
             display: none; 
@@ -17,16 +64,41 @@
     </style>
 </head>
 <body>
-    
-    <div class="card">
-        <h1 id="message">Wormy the Wormypus</h1>
-        <button id="startBtn">Start Game</button>
+
+    <div id="startCard" class="card">
+        <h1>Wormy the Wormypus</h1>
+        <p>The garden needs you.</p>
+        <button id="startBtn">Start Mission</button>
     </div>
-    <div id="winCard" class="card" style="display: none;">
-        <h1>You Win!</h1>
-        <p>The garden is clean!</p>
+
+    <div id="instructionCard" class="card" style="display: none;">
+        <h2 style="color: #2ecc71;">Mission Briefing</h2>
+        
+        <div style="text-align: left; margin: 20px 0; font-size: 1rem;">
+            <p><strong>The Story:</strong> The world's soil is toxic because humans are... well, pooping too much. The ecosystem is collapsing.</p>
+            <p><strong>Your Job:</strong> You are the last hope. You must eat the toxic dirt to expose the fresh, revitalized soil underneath. Do it quickly before the toxicity spreads!</p>
+        </div>
+
+        <div class="info-box">
+            <div>
+                <strong>Controls</strong><br>
+                WASD or Arrow Keys
+            </div>
+            <div>
+                <strong>Objective</strong><br>
+                Clear dirt in 2 Minutes!
+            </div>
+        </div>
+
+        <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 5...</h3>
+    </div>
+
+    <div id="endCard" class="card" style="display: none;">
+        <h1 id="endTitle">Game Over</h1>
+        <p id="endMessage">...</p>
         <button onclick="location.reload()">Play Again</button>
     </div>
+
     <canvas id="gameCanvas"></canvas>
     
     <script type="module">
@@ -34,51 +106,33 @@
         import { Map } from './Map.js';
         import { Rock } from './Rock.js';
         
-        const myButton = document.getElementById('startBtn');
+        // --- DOM ELEMENTS ---
+        const startCard = document.getElementById('startCard');
+        const instructionCard = document.getElementById('instructionCard');
+        const countdownText = document.getElementById('countdown');
+        const endCard = document.getElementById('endCard');
+        const startBtn = document.getElementById('startBtn');
         const mainCanvas = document.getElementById('gameCanvas');
         const ctx = mainCanvas.getContext('2d');
+        
+        // --- INPUTS ---
         const keys = {};
-        
-        // --- 1. WORLD SETTINGS ---
-        const worldWidth = 3200;
-        const worldHeight = 1800;
-        
-        let ticks = 0;
-        
-        // --- 2. LOAD ASSETS ---
-        const backgroundImage = new Image();
-        backgroundImage.src = "./BackdropWormGame.png";
-        
-        // --- 3. CREATE OBJECTS ---
-        const map = new Map(worldWidth, worldHeight); 
-        const rocks = [];
-        
-        // Create 20 random rocks
-        for(let i = 0; i < 20; i++) {
-            // Random Position
-            let rx = Math.random() * worldWidth;
-            let ry = Math.random() * (worldHeight - 310) + 310;
-            
-            // Random Size (Radius between 30 and 80)
-            let rSize = Math.random() * 50 + 30;
-            
-            // Create the rock
-            rocks.push(new Rock(rx, ry, rSize));
-        }
-        // --- FIX: Start Length is now 1 ---
-        const worm = new Player(700, 400, 4, 30, 100, 1, map);
-        map.setPlayer(worm); 
-        
-        // Input Handling
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
-        
-        // --- AUDIO SYSTEM ---
-        const playlist = [
-        './audio/Worm on a roll.mp3',
-        './audio/Bloopin.mp3'
-        ];
-        
+
+        // --- WORLD SETTINGS ---
+        const worldWidth = 3200;
+        const worldHeight = 1800;
+        let ticks = 0;
+        let gameTime = 120; // 2 minutes (in seconds)
+        let isGameRunning = false;
+
+        // --- ASSETS ---
+        const backgroundImage = new Image();
+        backgroundImage.src = "./BackdropWormGame.png"; // Ensure this file exists!
+
+        // --- AUDIO ---
+        const playlist = ['./audio/Worm on a roll.mp3', './audio/Bloopin.mp3'];
         let currentTrack = 0;
         const audioPlayer = new Audio(playlist[currentTrack]);
         audioPlayer.volume = 0.4; 
@@ -86,149 +140,181 @@
         function playNextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length;
             audioPlayer.src = playlist[currentTrack];
-            audioPlayer.play().catch(e => console.log("Audio play blocked until interaction"));
+            audioPlayer.play().catch(e => console.log("Audio waiting for interaction"));
         }
         audioPlayer.addEventListener('ended', playNextTrack);
+
+        // --- GAME OBJECTS ---
+        const map = new Map(worldWidth, worldHeight); 
+        const rocks = [];
         
-        map.startRain();
-        
+        // Generate Rocks
+        for(let i = 0; i < 20; i++) {
+            let rx = Math.random() * worldWidth;
+            let ry = Math.random() * (worldHeight - 310) + 310;
+            let rSize = Math.random() * 50 + 30;
+            rocks.push(new Rock(rx, ry, rSize));
+        }
+
+        // Create Worm (Start length 1)
+        // Params: x, y, maxSpeed, width, health, length, map
+        const worm = new Player(700, 400, 4, 30, 100, 1, map);
+        map.setPlayer(worm); 
+
+
+        // --- MAIN GAME LOOP ---
         function gameLoop() {
-            // A. UPDATE PHYSICS
+            if (!isGameRunning) return;
+
+            // 1. UPDATE PHYSICS
             worm.calculateAngle(keys);
             
             let dirtDug = 0;
-            // Calculate dirt removed
             for (let i = 0; i < worm.wormNodes.length; i++) {
                 dirtDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
             }
             
-            // Pass dirtDug to velocity
             worm.calculateVelocity(keys, dirtDug);
-            
-            // --- CRITICAL FIX: Pass 'rocks' as the 3rd argument ---
-            // (If you pass dirtDug here by mistake, collision won't work)
             worm.updatePos(worldWidth, worldHeight, rocks); 
             
-            // Check for death
+            // 2. CHECK WIN/LOSS CONDITIONS
+            
+            // Condition A: Health
             if (worm.health <= 0) {
-                alert("Game Over! You hit too many rocks.");
-                location.reload();
+                endGame("Mission Failed", "Your worm took too much damage from rocks!");
                 return;
             }
 
-            worm.drown();
-            
-            // ... rest of loop (growth logic, camera, drawing) ...
-            // B. DIGGING LOGIC
-            // Dig at every node position
-            
-            
-            
-            // --- FIX: PERCENTAGE BASED GROWTH ---
-            // Calculate current percentage
+            // Condition B: Time
+            let secondsPassed = Math.floor(ticks / 60); // Assuming 60 FPS
+            let timeLeft = gameTime - secondsPassed;
+            if (timeLeft <= 0) {
+                endGame("Time's Up!", "The soil toxicity levels remain too high.");
+                return;
+            }
+
+            // Condition C: Win (99.9% Cleared)
             let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
-            
+            if (percent > 99.9) {
+                endGame("Victory!", "The garden is clean and the soil is fresh!");
+                return;
+            }
+
+            // 3. GROWTH LOGIC
             // Formula: Start at 1. Add 1 segment for every 0.5% cleared.
-            // Example: 0.5% = Length 2. 1.0% = Length 3.
             let targetLength = 1 + Math.floor(percent / 0.5);
-            
-            // If we are shorter than the target, GROW
             while (worm.wormNodes.length < targetLength) {
                 worm.grow();
-                console.log(`Growing! Pct: ${percent.toFixed(2)}% | New Length: ${worm.wormNodes.length}`);
             }
             
-            // C. CAMERA LOGIC
+            // 4. CAMERA
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
             
-            // D. DRAWING
+            // Dynamic Zoom
+            map.cameraScale = Math.max(3 - worm.wormNodes.length/80, 1.0);
+
+            // 5. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
-            ctx.save(); // <--- START CAMERA
-            
+            ctx.save(); 
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
-            // Draw Background
+            // Background
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
                 ctx.fillStyle = "#333";
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
-
-            // // RAIN LOGICa
-            // if (Math.random() <=1 && !map.isRaining) { 
-                
-            // }
-
+            
+            // Rain
+            if (Math.random() < 0.0002) map.startRain();
             if (map.isRaining) {
-
-                map.rainTime += 1
-
-                if (map.rainTime < 60 * 10) {
-                    map.rainLevel += 1; // The rain goes up
-                } else if (map.rainTime < 60 * 15) {
-
-                } else {
-                    map.rainLevel -= 1; // Goes down
-                }
+                map.rainLevel += 5; 
+                if (map.rainLevel > worldHeight) map.isRaining = false;
             }
             
+            map.draw(ctx, worldWidth);
             worm.draw(ctx);
-            map.draw(ctx);
             
+            // Rocks (Draw before restore so they move with camera)
             for (let r of rocks) {
                 r.draw(ctx);
             }
             
-            ctx.restore(); // <--- END CAMERA
-            
-            // E. HUD
-            ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(0, 0, mainCanvas.width, 80); 
-            
-            let percentString = percent.toFixed(2);
-            let currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
-            
-            ctx.fillStyle = "white";
-            ctx.font = "20px sans-serif";
-            
-            // Line 1
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 35);
-            
-            // Line 2
-            ctx.fillStyle = "#ffff00"; 
-            ctx.fillText(`Deepest: ${currentDepth}px  |  Length: ${worm.wormNodes.length}`, 20, 65);
+            ctx.restore(); 
 
-
-            ctx.fillText(`Rain: ${map.rainLevel}`, 20, 100);
-
-
-            if (percent > 99.9) {
-                document.getElementById('winCard').style.display = 'block';
-                return; 
-            }
-            
-            // Dynamic Camera Zoom (Limit zoom out so we don't see edges too much)
-            map.cameraScale = Math.max(3 - worm.wormNodes.length/80, 1.0);
+            // 6. HUD (Head Up Display)
+            drawHUD(percent, timeLeft, worm.health);
             
             requestAnimationFrame(gameLoop);
             ticks++;
         }
         
-        myButton.addEventListener('click', () => {
-            document.querySelector('.card').style.display = 'none';
-            mainCanvas.width = window.innerWidth;
-            mainCanvas.height = window.innerHeight;
-            mainCanvas.style.display = 'block';
+        function drawHUD(percent, timeLeft, health) {
+            ctx.fillStyle = "rgba(0,0,0,0.6)";
+            ctx.fillRect(0, 0, mainCanvas.width, 80); 
             
-            audioPlayer.play();
-            gameLoop();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px sans-serif";
+            
+            let percentString = percent.toFixed(2);
+            let currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
+            
+            // Line 1
+            ctx.fillText(`Dirt Cleared: ${percentString}%`, 20, 35);
+            
+            // Line 2 (Timer color changes if low)
+            ctx.fillStyle = timeLeft < 30 ? "#ff4444" : "#ffff00"; 
+            ctx.fillText(`Time Left: ${timeLeft}s`, 20, 65);
+
+            // Line 3 (Stats)
+            ctx.fillStyle = "#ddd";
+            ctx.fillText(`Deepest: ${currentDepth}px  |  Length: ${worm.wormNodes.length}`, 250, 65);
+        }
+
+        function endGame(title, message) {
+            isGameRunning = false;
+            mainCanvas.style.display = 'none';
+            endCard.style.display = 'block';
+            document.getElementById('endTitle').innerText = title;
+            document.getElementById('endMessage').innerText = message;
+        }
+        
+        // --- BUTTON LOGIC ---
+        startBtn.addEventListener('click', () => {
+            // 1. Hide Start Menu
+            startCard.style.display = 'none';
+            
+            // 2. Show Instructions
+            instructionCard.style.display = 'block';
+            
+            let secondsLeft = 10;
+            
+            // 3. Countdown Timer
+            const timerInterval = setInterval(() => {
+                secondsLeft--;
+                countdownText.innerText = `Starting in ${secondsLeft}...`;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    
+                    // 4. Start Game
+                    instructionCard.style.display = 'none';
+                    mainCanvas.style.display = 'block';
+                    mainCanvas.width = window.innerWidth;
+                    mainCanvas.height = window.innerHeight;
+                    
+                    isGameRunning = true;
+                    audioPlayer.play().catch(e => console.log("Audio needs user interaction"));
+                    gameLoop();
+                }
+            }, 1000);
         });
         
         window.addEventListener('resize', () => {
