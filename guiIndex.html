@@ -19,7 +19,6 @@
     <canvas id="gameCanvas"></canvas>
     
     <script type="module">
-        // 1. IMPORT: This pulls the code from your other file
         import {Player} from './Player.js';
         import {Map} from './Map.js';
         
@@ -37,10 +36,10 @@
         const backgroundImage = new Image();
         
         // 3. CREATE PLAYER & BG
-        // We use the 5 arguments your class requires: (x, y, speed, width, health)
         const map = new Map(300, 125);
 
-        const worm = new Player(700, 400, 5, 30, 100, map);
+        // FIXED: Added the missing "length" argument (1) before passing 'map'
+        const worm = new Player(700, 400, 5, 30, 100, 1, map);
         
         backgroundImage.src = "./BackdropWormGame.png";
         
@@ -52,13 +51,12 @@
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
             
-            // Pass the WORLD size, so player stops at 3000, not at the screen edge
             worm.updatePos(worldWidth, worldHeight); 
             
             // B. CAMERA LOGIC
-            // Center camera on player
-            let camX = worm.pos_x - (mainCanvas.width / 2 / map.cameraScale);
-            let camY = worm.pos_y - (mainCanvas.height / 2 / map.cameraScale);
+            // FIXED: Changed worm.pos_x to worm.map_x (The variable that actually exists)
+            let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
+            let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             // Clamp camera to world edges
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
@@ -69,14 +67,13 @@
             
             ctx.save(); // Start Camera
             
+            // This scales EVERYTHING. Player and Map should draw at 1x scale, this makes them 5x.
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
-            // Draw Background or Grid
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
-                // Draw grid if no image found
                 ctx.strokeStyle = "#444";
                 ctx.lineWidth = 5;
                 ctx.strokeRect(0, 0, worldWidth, worldHeight);
@@ -92,11 +89,10 @@
             
             ctx.restore(); // End Camera
             
-            // D. HUD (Text stays fixed on screen)
-
-            // Debug
+            // D. HUD
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
+            // Fixed HUD variable names too
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)}`, 20, 40);
             
             requestAnimationFrame(gameLoop);
@@ -104,14 +100,9 @@
         
         myButton.addEventListener('click', () => {
             document.querySelector('.card').style.display = 'none';
-            
-            // Make canvas fill the window
             mainCanvas.width = window.innerWidth;
             mainCanvas.height = window.innerHeight;
-            
-            // --- TYPO FIXED HERE ---
             mainCanvas.style.display = 'block';
-            
             gameLoop();
         });
     </script>

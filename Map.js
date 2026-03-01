@@ -18,6 +18,9 @@ export class Map {
         this.width = width;
         this.height = height;
         
+        // Fix: Make the static scale available to the instance so index.html can read 'map.cameraScale'
+        this.cameraScale = Map.cameraScale;
+
         this.grid = new Int8Array(width * height);
 
         this.grid.fill(1); 
@@ -49,25 +52,19 @@ export class Map {
     }
 
     draw(ctx) {
-        
+        // Note: Because index.html handles the ctx.scale, we draw at 1x1 size here
+        // and let the main canvas scale it up.
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const tile = this.grid[(y * this.width) + x];
 
                 if (tile == Map.DIRT) {
 
-                    ctx.fillStyle = "#8B4513"; // SaddleBrown color for dirt
-                    ctx.fillRect(
-                        x * this.cameraScale, 
-                        y * this.cameraScale, 
-                        this.cameraScale, 
-                        this.cameraScale
-                    );
+                    ctx.fillStyle = "#8B4513"; 
+                    // Draw 1 unit wide, let index.html handle the Zoom
+                    ctx.fillRect(x, y, 1, 1);
                 }
             }
         }
     }
-
-    
-
 }

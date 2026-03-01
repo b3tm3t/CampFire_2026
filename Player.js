@@ -38,7 +38,6 @@ export class Player {
 
     calculateAngle(input) { 
         // 1. Check for Arrow Keys OR WASD
-        // (This makes sure it works regardless of which keys you press)
         let right = input.ArrowRight || input.d;
         let left  = input.ArrowLeft  || input.a;
         let down  = input.ArrowDown  || input.s;
@@ -65,7 +64,6 @@ export class Player {
     }
     
     calculateVelocity(input) {
-        // Check if ANY movement key is pressed
         let isMoving = input.ArrowRight || input.d || input.ArrowLeft || input.a || 
                        input.ArrowDown || input.s || input.ArrowUp || input.w;
 
@@ -80,28 +78,22 @@ export class Player {
     // 1. Accept the canvas size so we know where the walls are
     updatePos(canvasWidth, canvasHeight) {
         
-        // 2. Calculate the "Half Width" (radius) 
-        // Since you draw from the center, this is the distance from center to edge.
         let halfSize = this.width / 2;
 
-        // 3. Calculate where the player WANTS to go next
-        let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity / Map.cameraScale;
-        let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity / Map.cameraScale;
+        // FIXED: Do not divide by cameraScale. Velocity should be consistent regardless of zoom.
+        let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity;
+        let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity;
 
-        // 4. Horizontal Collision (Left and Right Walls)
-        // logic: Is nextX greater than the left edge AND less than the right edge?
         if (nextX > halfSize && nextX < canvasWidth - halfSize) {
             this.map_x = nextX;
         }
 
-        // 5. Vertical Collision (Top and Bottom Walls)
-        // logic: Is nextY greater than the top edge AND less than the bottom edge?
         if (nextY > (133 + halfSize) && nextY < canvasHeight - halfSize) {
             this.map_y = nextY;
         }
     }
 
-    eat(num) { // See how much you eat, and increase 
+    eat(num) { 
         
     }
 
@@ -109,31 +101,18 @@ export class Player {
 
     }
 
-    draw(ctx) { // Like refresh
-
+    draw(ctx) { 
         
         ctx.fillStyle = "#2ecc71";
 
-        // 4. Draw the square CENTERED on (0,0)
-        // We use -width/2 so the center of the square is the rotation point
+        // FIXED: Don't multiply by cameraScale here. 
+        // index.html already scales the whole world.
+        let halfW = this.width / 2;
 
-        let headNode = this.wormNodes[0];
+        // Draw centered on map_x/map_y
+        ctx.fillRect(this.map_x - halfW, this.map_y - halfW, this.width, this.width);
 
-        let screenX = headNode.width / 2 * Map.cameraScale;
-        let screenY = headNode.width / 2 * Map.cameraScale;
-
-        ctx.fillRect(this.map_x-screenX, this.map_y-screenY, screenX, screenY);
-
-        ctx.restore(); // 5. Restore the canvas to how it was before
-        
+        // Removed ctx.restore() because there was no ctx.save() in this function
+        // The save/restore is handled in index.html
     }
-
-
-
-
-
-    
-
-    
-
 }
