@@ -1,4 +1,5 @@
 import { Map } from './Map.js';
+import { Node } from './Node.js';
 
 export class Player {
     // Materials
@@ -27,12 +28,17 @@ export class Player {
         this.map = map;
         
         this.wormNodes = new Array(1);
-        this.wormNodes=[]; 
-        for (let i=0; i<this.length; i++){
-            this.wormNodes.push({ x: this.map_x, y: this.map_y });
-        } 
+        
+        
         this.dirtStomach = 0; // Tracks how much dirt we've eaten
         this.growthThreshold = 23840; // How much dirt equals 1 new segment 
+        // 
+        
+        this.wormNodes = []; 
+        for (let i = 0; i < this.length; i++) {
+            // Passing: x, y, index, and a reference to 'this' player
+            this.wormNodes.push(new Node(this.map_x, this.map_y, i, this));
+        }
     }
     
     calculateAngle(input) { 
@@ -78,110 +84,94 @@ export class Player {
         this.forwardVelocity = Math.max(0, Math.min(this.speed, this.forwardVelocity));
     }
     
-    updatePos(worldWidth, worldHeight) {
+    updatePos(worldWidth, worldHeight) { // Update this worm's thing, as well as the other nodes' colors and positions
         let r = this.width / 2; 
-        
         let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity;
         let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity;
         
-        if (nextX > r && nextX < worldWidth - r) {
-            this.map_x = nextX;
-        }
+        if (nextX > r && nextX < worldWidth - r) { this.map_x = nextX; }
+        if (nextY > (310 + r) && nextY < worldHeight - r) { this.map_y = nextY; }
         
-        if (nextY > (310 + r) && nextY < worldHeight - r) {
-            this.map_y = nextY;
-        }
-        
-        // 1. Sync the Head (Node 0) to the Player's position
+        // 2. Sync Head Node using Node class properties (.pos_x)
         if(this.wormNodes[0]) {
-            this.wormNodes[0].x = this.map_x;
-            this.wormNodes[0].y = this.map_y;
+            this.wormNodes[0].pos_x = this.map_x;
+            this.wormNodes[0].pos_y = this.map_y;
+            this.wormNodes[0].update(); // Refresh width/color
         }
         
-        // 2. Drag the Body (Nodes 1 to End)
-        // Each node follows the one before it
-        let spacing = this.width / 2; // Overlap amount (smaller number = tighter body)
+        let spacing = this.width / 2; 
         
         for (let i = 1; i < this.wormNodes.length; i++) {
             let prev = this.wormNodes[i - 1];
             let curr = this.wormNodes[i];
             
-            // Calculate angle from Current -> Previous
-            let dx = prev.x - curr.x;
-            let dy = prev.y - curr.y;
+            // Accessing .pos_x and .pos_y instead of .x and .y
+            let dx = prev.pos_x - curr.pos_x;
+            let dy = prev.pos_y - curr.pos_y;
             let angle = Math.atan2(dy, dx);
-            
-            // Move Current to be exactly 'spacing' distance away from Previous
-            // Only move if they are too far apart
             let dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist > spacing) {
-                curr.x = prev.x - Math.cos(angle) * spacing;
-                curr.y = prev.y - Math.sin(angle) * spacing;
+                curr.pos_x = prev.pos_x - Math.cos(angle) * spacing;
+                curr.pos_y = prev.pos_y - Math.sin(angle) * spacing;
             }
 
-            //this.wormNodes[i].updatePos();
+            // 3. Call the Node's own update method to handle its segment logic
+            curr.update();
         }
-    }
+    }   
     
-    draw(ctx) {
-        // Draw from tail to head (so head is on top)
-        for (let i = this.wormNodes.length - 1; i >= 0; i--) {
+    draw(ctx) { 
+
+        console.log("Length:", this.wormNodes.length)
+        for (let i = this.wormNodes.length - 1; i >= 0; i--) { // Draw starting from backwards
             let node = this.wormNodes[i];
             
             ctx.save();
-            ctx.translate(node.x, node.y);
+            ctx.translate(node.pos_x, node.pos_y);
             
-            // 1. Draw the Circle (Body or Head)
             ctx.beginPath();
-            ctx.arc(0, 0, this.width / 2, 0, Math.PI * 2);
-            ctx.fillStyle = (i === 0) ? "#2ecc71" : "#27ae60"; // Head is lighter green
+            // 4. Use node.width (calculated by Node logic) instead of this.width
+            ctx.arc(0, 0, node.width, 0, Math.PI * 2);
+
+            
+            
+            // 5. Use node.color (assigned in Node logic) or keep player colors
+            ctx.fillStyle = node.color; 
             ctx.fill();
             
-            // 2. Head Specific Things (Eyes & Health Bar)
             if (i === 0) { 
-                
-                // --- A. Draw Eyes ---
-                ctx.save(); // Save before rotating for eyes
+                ctx.save();
                 ctx.rotate(this.currentAngle);
                 ctx.fillStyle = "black";
-                ctx.fillRect(5, -5, 5, 5); // Right eye
-                ctx.fillRect(5, 5, 5, 5);  // Left eye
-                ctx.restore(); // Restore so health bar doesn't rotate with head
+                ctx.fillRect(5, -5, 5, 5); 
+                ctx.fillRect(5, 5, 5, 5);  
+                ctx.restore(); 
                 
-                // --- B. Draw Health Bar ---
-                // (Offsets are x=-25, y=-40 to float above the head)
-                
-                // Background (Red)
                 ctx.fillStyle = "red";
                 ctx.fillRect(-25, -40, 50, 6);
-                
-                // Foreground (Green)
                 let hpPercent = this.health / 100; 
                 ctx.fillStyle = "#00ff00";
                 ctx.fillRect(-25, -40, 50 * hpPercent, 6);
-                
-                // Border (Black)
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 1;
                 ctx.strokeRect(-25, -40, 50, 6);
             }
+
+            ctx.fillStyle = "black";
+            ctx.fillText(node.referenceSegment, node.pos_x, node.pos_y, 100)
             
             ctx.restore();
+
+            
         }
+
     }        
     grow() {
-        // 1. Find the very last node (the tail)
-        let tail = this.wormNodes[this.wormNodes.length - 1];
-        
-        // 2. Add a new node at the exact same spot as the tail
-        // It will naturally drift apart as you move
-        this.wormNodes.push({
-            x: tail.x,
-            y: tail.y
-        });
-        
-        // Note: Because we are using simple objects for nodes now (from previous step), 
-        // we push {x, y}. If you are still using the Node class, use: new Node(tail.x, tail.y, this.width, this)
-    }
+    let tail = this.wormNodes[this.wormNodes.length - 1];
+    // Use the current length as the new node's index
+    let newNode = new Node(tail.pos_x, tail.pos_y, this.wormNodes.length - 1, this);
+    this.wormNodes.push(newNode);
+    this.length = this.wormNodes.length;
+}
 }

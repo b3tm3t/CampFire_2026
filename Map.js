@@ -4,6 +4,10 @@ export class Map {
     static DIRT = 1;
     
     static cameraScale = 3; 
+
+    rainLevel;
+
+    isRaining;
     
     constructor(width, height) {
         this.width = width;
@@ -93,9 +97,24 @@ export class Map {
         return dirtDug; 
     }
     
-    draw(ctx) {
+    draw(ctx, worldWidth) {
         // We just draw the image we created in the constructor
         // Because index.html handles the Zoom/Camera, we just draw at 0,0
+
+        if (this.isRaining) {
+            ctx.fillRect(0, this.rainLevel, worldWidth, this.lowestDugY);
+        }
+        
         ctx.drawImage(this.shadowCanvas, 0, 0);
     }
+
+    startRain() {
+        this.rainLevel = this.lowestDugY;
+        this.isRaining = true;
+    }
+
+    getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
 }

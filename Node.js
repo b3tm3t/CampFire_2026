@@ -10,10 +10,10 @@ export class Node {
 
     color;
 
+    referenceSegment;
+
     REGULAR = "#FC8168";
     RING = "#FC9F8D";
-
-
 
     constructor(pos_x, pos_y, posInPlayer, player) {
         this.pos_x = pos_x;
@@ -40,84 +40,78 @@ export class Node {
 
     determineSegmentWidthBaby() {
 
-        let referenceSegment = this.posInPlayer * 100 / this.player.length;
+        this.referenceSegment = this.posInPlayer * 100 / (this.player.length - 1);
 
-        if (referenceSegment < 30) {
+        if (this.referenceSegment < 30) {
             this.color = this.REGULAR;
-            return 3;
+            return 15;
             
         }
 
-        if (referenceSegment < 70) {
+        if (this.referenceSegment < 50) {
             this.color = this.REGULAR;
-            return 4;
+            return 18;
         }
 
         this.color = this.REGULAR;
-        return 3;
+        return 15;
     }
 
     determineSegmentWidthMedium() {
 
-        let referenceSegment = this.posInPlayer * 100 / this.player.length;
+        this.referenceSegment = this.posInPlayer * 100 / this.player.length;
 
-        if (referenceSegment < 15) {
+        if (this.referenceSegment < 15) {
             this.color = this.REGULAR;
-            return 3;
+            return 15;
         }
 
-        if (referenceSegment < 30) {
+        if (this.referenceSegment < 30) {
             this.color = this.RING;
-            return 4;
+            return 20;
         }
 
-        if (referenceSegment < 40) {
+        if (this.referenceSegment < 40) {
             this.color = this.REGULAR;
             
-            return 5;
+            return 15;
         }
 
-        if (referenceSegment < 85) {
+        if (this.referenceSegment < 85) {
             this.color = this.REGULAR;
-            return 4;
+            return 15;
         }
 
         this.color = this.REGULAR;
-        return 3;
+        return 15;
     }
 
     determineSegmentWidthBig() {
 
-        let referenceSegment = this.posInPlayer * 100 / this.player.length;
+        this.referenceSegment = this.posInPlayer * 100 / this.player.length;
 
-        if (referenceSegment < 15) {
+        if (this.referenceSegment < 15) {
             this.color = this.REGULAR;
-            return 4;
+            return 15;
         }
 
-        if (referenceSegment < 30) {
+        if (this.referenceSegment < 30) {
             this.color = this.RING;
-            return 5;
+            return 20;
         }
 
-        if (referenceSegment < 40) {
+        if (this.referenceSegment < 40) {
             this.color = this.REGULAR;
-            return 6;
+            return 15;
         }
 
-        if (referenceSegment < 85) {
+        if (this.referenceSegment < 85) {
             this.color = this.REGULAR;
-            return 5;
+            return 15;
         }
 
         this.color = this.REGULAR;
-        return 4;
+        return 15;
     }
 
-
-
-    moveTo(pos_x, pos_y) {
-        this.pos_x = pos_x;
-        this.pos_y = pos_y;
-    }
 }

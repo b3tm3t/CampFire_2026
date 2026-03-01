@@ -41,6 +41,9 @@
         // --- 1. WORLD SETTINGS ---
         const worldWidth = 3200;
         const worldHeight = 1800;
+
+        // (Game ticks)
+        let ticks = 0;
         
         // --- 2. LOAD ASSETS ---
         const backgroundImage = new Image();
@@ -90,9 +93,8 @@
                 let amountDug = 0
                 
                 for (let i = 0; i < worm.wormNodes.length; i++) {
-                    amountDug += map.dig(worm.wormNodes[i].x, worm.wormNodes[i].y, worm.width/2);
+                    amountDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
                 }
-                
                 
                 // 2. Feed the worm
                 worm.dirtStomach += amountDug;
@@ -127,9 +129,18 @@
                 ctx.fillStyle = "#333"; // Fallback dark grey background
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
+
+            if (Math.random() * 5000 + 20000) {
+                map.startRain();
+            }
+
+            if (map.isRaining) {
+                map.rainLevel++;
+            }
+
             
             // Draw Map (The Dirt)
-            map.draw(ctx);
+            map.draw(ctx, worldWidth);
             
             // Draw Worm
             worm.draw(ctx);
@@ -165,6 +176,8 @@
                 document.getElementById('winCard').style.display = 'block';
                 return; // Stop the game loop
             }
+
+            map.cameraScale = Math.max(3 - worm.length/10, 1.2);
             
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
@@ -172,6 +185,11 @@
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 40);
             
             requestAnimationFrame(gameLoop);
+
+            ticks++;
+
+            
+
         }
         
         myButton.addEventListener('click', () => {
@@ -190,6 +208,8 @@
                 mainCanvas.height = window.innerHeight;
             }
         });
+
+        
     </script>
 </body>
 </html>
