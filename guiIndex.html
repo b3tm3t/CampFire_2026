@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Worm Game 3 GUI</title>
+    <title>Worm Game 3</title>
     <style>
         body { 
             font-family: sans-serif; 
@@ -45,7 +45,7 @@
 <body>
     
     <div class="card">
-        <h1 id="message">Worm Game 3</h1>
+        <h1 id="message">Wormy the Wormypus</h1>
         <button id="startBtn">Start Game</button>
     </div>
     <canvas id="gameCanvas"></canvas>
@@ -85,9 +85,9 @@
             worm.updatePos(worldWidth, worldHeight); 
             
             // B. CAMERA LOGIC
-            // Center camera on player
-            let camX = worm.pos_x - (mainCanvas.width / 2 / map.cameraScale);
-            let camY = worm.pos_y - (mainCanvas.height / 2 / map.cameraScale);
+            // FIXED: Changed worm.pos_x to worm.map_x (The variable that actually exists)
+            let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
+            let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             // Clamp camera to world edges
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
@@ -137,6 +137,7 @@
 
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
+            // Fixed HUD variable names too
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)}`, 20, 40);
             
             requestAnimationFrame(gameLoop);
