@@ -38,22 +38,41 @@ export class Player {
 
     calculateAngle(input) { 
         
-        let leftRight = input.ArrowLeft - input.ArrowRight;
-        let upDown = input.ArrowUp - input.ArrowDown;
+        let dx = input.ArrowRight - input.ArrowLeft;
+        let dy = input.ArrowDown - input.ArrowUp;
 
-        let desiredAngle = Math.atan(upDown/leftRight);
+        if (dx !== 0 || dy !== 0) {
 
-        let angleDiff = (desiredAngle - this.currentAngle) % (Math.PI * 2); 
+            let desiredAngle = Math.atan2(dy, dx);
 
-        if (angleDiff > Math.PI) { // Turn clockwise
-            this.currentAngle += (Math.PI)/180 * this.angleTurning;
-        } else { // Turn anti-clockwise
-            this.currentAngle -= (Math.PI)/180 * this.angleTurning;
+            let angleDiff = (desiredAngle - this.currentAngle);
+            
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+
+            if (Math.abs(diff) < (Math.PI / 180) * this.angleTurning) {
+                this.currentAngle = desiredAngle;
+            } else {
+                this.currentAngle += diff > 0 ? step : -step;
+            }
         }
 
     }
     
     calculateVelocity(input) {
+        if (input.ArrowLeft || input.ArrowRight || input.ArrowUp || input.ArrowDown) {
+            this.forwardVelocity++;
+        } else {
+            this.forwardVelocity--;
+        }
+
+        this.forwardVelocity = Math.max(0, Math.min(10, this.forwardVelocity));
+        
+    }
+
+    updatePos() {
+        this.pos_x += Math.cos(this.currentAngle) * this.forwardVelocity;
+        this.pos_y += Math.sin(this.currentAngle) * this.forwardVelocity;
 
     }
 
