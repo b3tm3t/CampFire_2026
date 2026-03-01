@@ -99,8 +99,8 @@
             camY = Math.max(0, camY);
             
             // Right/Bottom Limit: Cannot go past WorldWidth - ScreenWidth
-            camX = Math.min(camX, worldWidth - (mainCanvas.width / zoom));
-            camY = Math.min(camY, worldHeight - (mainCanvas.height / zoom));
+            camX = Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale));
+            camY = Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale));
             
             // C. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
