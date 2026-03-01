@@ -9,6 +9,8 @@ export class Map {
     static cameraScale = 3; 
     
     rainLevel = 0;
+
+    rainTime = 0;
     isRaining = false;
     
     constructor(width, height) {
@@ -87,7 +89,6 @@ export class Map {
                             this.lowestDugY = y;
                         }
                     }
-
                 }
             }
         }
@@ -104,22 +105,25 @@ export class Map {
         return dirtDug; 
     }
     
-    draw(ctx, worldWidth) {
+    draw(ctx) {
         // Draw the dirt map
-        ctx.drawImage(this.shadowCanvas, 0, 0);
         
+        
+
         // Draw Rain (if active)
         if (this.isRaining) {
-            ctx.fillStyle = "rgba(0, 0, 255, 0.3)"; // Semi-transparent blue
-            // Draw a rectangle from the sky down to the rain level
-            ctx.fillRect(0, 0, worldWidth, this.rainLevel);
+            ctx.fillStyle = "rgb(90, 203, 255)"; // Semi-transparent blue
+            // Draw a rectangle from the bottom to the rainLevel
+            ctx.fillRect(0, this.height, this.width, this.height - this.rainLevel);
         }
+
+        ctx.drawImage(this.shadowCanvas, 0, 0);
+        
     }
     
     startRain() {
-        if (!this.isRaining) {
-            this.rainLevel = 0; // Start rain at top
-            this.isRaining = true;
-        }
+        this.rainLevel = this.height - this.rainLevel; // Start rain at bottom
+        this.isRaining = true;
+
     }
 }

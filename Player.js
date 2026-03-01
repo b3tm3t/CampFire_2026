@@ -11,6 +11,8 @@ export class Player {
     width = 0;
     currentAngle = 0;
     health = 0;
+
+    hydration;
     
     angleTurning = 6; 
     forwardVelocity = 0;
@@ -148,6 +150,14 @@ export class Player {
             curr.update();
         }
     }   
+
+    drown() {
+        if (map_y > this.map.rainLevel) { // If it is deeper down in the 
+            this.hydration += 1;
+        }
+    }
+
+    
     
     draw(ctx) { 
         // Draw starting from tail to head

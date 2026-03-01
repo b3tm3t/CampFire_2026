@@ -90,6 +90,7 @@
         }
         audioPlayer.addEventListener('ended', playNextTrack);
         
+        map.startRain();
         
         function gameLoop() {
             // A. UPDATE PHYSICS
@@ -114,6 +115,8 @@
                 location.reload();
                 return;
             }
+
+            worm.drown();
             
             // ... rest of loop (growth logic, camera, drawing) ...
             // B. DIGGING LOGIC
@@ -157,21 +160,27 @@
                 ctx.fillStyle = "#333";
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
-            
-            // RAIN LOGICa
-            if (Math.random() < 0.0002) { 
-                map.startRain();
-            }
-            
+
+            // // RAIN LOGICa
+            // if (Math.random() <=1 && !map.isRaining) { 
+                
+            // }
+
             if (map.isRaining) {
-                map.rainLevel += 5; 
-                if (map.rainLevel > worldHeight) {
-                    map.isRaining = false;
+
+                map.rainTime += 1
+
+                if (map.rainTime < 60 * 10) {
+                    map.rainLevel += 1; // The rain goes up
+                } else if (map.rainTime < 60 * 15) {
+
+                } else {
+                    map.rainLevel -= 1; // Goes down
                 }
             }
             
-            map.draw(ctx, worldWidth);
             worm.draw(ctx);
+            map.draw(ctx);
             
             for (let r of rocks) {
                 r.draw(ctx);
@@ -195,7 +204,11 @@
             // Line 2
             ctx.fillStyle = "#ffff00"; 
             ctx.fillText(`Deepest: ${currentDepth}px  |  Length: ${worm.wormNodes.length}`, 20, 65);
-            
+
+
+            ctx.fillText(`Rain: ${map.rainLevel}`, 20, 100);
+
+
             if (percent > 99.9) {
                 document.getElementById('winCard').style.display = 'block';
                 return; 
