@@ -30,7 +30,7 @@ export class Player {
             this.wormNodes.push({ x: this.map_x, y: this.map_y });
         } 
         this.dirtStomach = 0; // Tracks how much dirt we've eaten
-        this.growthThreshold = 5000; // How much dirt equals 1 new segment 
+        this.growthThreshold = 23840; // How much dirt equals 1 new segment 
     }
     
     calculateAngle(input) { 

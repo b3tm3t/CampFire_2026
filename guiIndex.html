@@ -85,7 +85,8 @@
             // FIX 2: DIGGING & GROWTH LOGIC
             if (keys[' ']) {
                 // 1. Dig and get the amount
-                let amountDug = map.dig(worm.map_x, worm.map_y, worm.width);
+                // Multiply by 1.5 to make the hole 50% larger than the worm
+                let amountDug = map.dig(worm.map_x, worm.map_y, worm.width * 1.5);
                 
                 // 2. Feed the worm
                 worm.dirtStomach += amountDug;
