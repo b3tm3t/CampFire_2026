@@ -19,11 +19,20 @@ export class Map {
         this.height = height;
         this.cameraScale = Map.cameraScale;
 
+        // 1. Logic Grid (Used for collisions/physics)
         this.grid = new Int8Array(width * height);
-        
-        // 1. FILL WITH DIRT (This creates the brown background)
-        // If you want empty space, change this to 0 (NOTHING)
-        this.grid.fill(0); 
+        this.grid.fill(1); // Fill logic with dirt
+
+        // 2. Visual Buffer (The "Shadow Canvas")
+        // We create an invisible canvas to hold the drawing of the map
+        this.shadowCanvas = document.createElement('canvas');
+        this.shadowCanvas.width = width;
+        this.shadowCanvas.height = height;
+        this.shadowCtx = this.shadowCanvas.getContext('2d');
+
+        // 3. Draw the initial DIRT onto the Shadow Canvas ONCE
+        this.shadowCtx.fillStyle = "#8B4513";
+        this.shadowCtx.fillRect(0, 0, width, height);
     }
 
     setTile(x, y, value) {
@@ -37,6 +46,7 @@ export class Map {
     }
 
     dig(pos_x, pos_y, radius) { 
+        // 1. Update the Logic Grid (Math)
         for (let x = -radius; x < radius; x++) {
             for (let y = -radius; y < radius; y++) { 
                 if ((x ** 2 + y **2 ) ** (1/2) < radius) {
@@ -44,44 +54,19 @@ export class Map {
                 }
             }
         }
+
+        // 2. Update the Visuals (The Image)
+        // Instead of redrawing the whole map, we just erase this circle from the image
+        this.shadowCtx.globalCompositeOperation = 'destination-out'; // This makes drawing "erase"
+        this.shadowCtx.beginPath();
+        this.shadowCtx.arc(pos_x, pos_y, radius, 0, Math.PI * 2);
+        this.shadowCtx.fill();
+        this.shadowCtx.globalCompositeOperation = 'source-over'; // Reset to normal drawing
     }
 
-    // UPDATED: Now accepts camera info to optimize drawing
-    draw(ctx, camX, camY, canvasWidth, canvasHeight) {
-        
-        // 1. Calculate the Visible Area (Culling)
-        // We only want to draw loops from the left side of the screen to the right side
-        // The "+1" and "buffer" are to prevent flickering at the edges
-        const buffer = 2; 
-
-        let startX = Math.floor(camX) - buffer;
-        let startY = Math.floor(camY) - buffer;
-        
-        let endX = startX + (canvasWidth / this.cameraScale) + (buffer * 2);
-        let endY = startY + (canvasHeight / this.cameraScale) + (buffer * 2);
-
-        // 2. Clamp values so we don't look outside the map array
-        startX = Math.max(0, startX);
-        startY = Math.max(0, startY);
-        endX = Math.min(this.width, endX);
-        endY = Math.min(this.height, endY);
-
-        // 3. The Optimized Loop
-        for (let y = startY; y < endY; y++) {
-            for (let x = startX; x < endX; x++) {
-                
-                const tile = this.grid[(y * this.width) + x];
-
-                if (tile !== Map.NOTHING) {
-                    if (tile == Map.DIRT) ctx.fillStyle = "#8B4513";
-                    else if (tile == Map.CLAY) ctx.fillStyle = "#A0522D";
-                    
-                    // Draw the tile
-                    // Note: We create a 1.05 width to slightly overlap and prevent 
-                    // tiny "cracks" (grid lines) between tiles when zooming.
-                    ctx.fillRect(x, y, 1.05, 1.05);
-                }
-            }
-        }
+    draw(ctx) {
+        // SUPER FAST: We just draw the pre-rendered image!
+        // No loops, no math, just one image copy.
+        ctx.drawImage(this.shadowCanvas, 0, 0);
     }
 }
