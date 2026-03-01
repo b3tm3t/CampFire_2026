@@ -63,10 +63,6 @@
         // --- 1. WORLD SETTINGS ---
         const worldWidth = 3200;
         const worldHeight = 1800;
-<<<<<<< HEAD
-=======
-        const zoom = 2; // Zoom Level
->>>>>>> fdc23b3 (ew stinky zoom conflicts ew)
         
         // --- 2. LOAD ASSETS ---
         const backgroundImage = new Image();
@@ -88,7 +84,6 @@
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
             
-<<<<<<< HEAD
             // B. CAMERA LOGIC
             // Center camera on player
             let camX = worm.pos_x - (mainCanvas.width / 2 / map.cameraScale);
@@ -97,14 +92,6 @@
             // Clamp camera to world edges
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
-=======
-            // B. CAMERA LOGIC (The Clamping)
-            
-            // 1. Calculate the ideal camera position (Centered on player)
-            // We divide canvas dimensions by zoom because the view is zoomed in
-            let camX = worm.map_x - (mainCanvas.width / 2 / zoom);
-            let camY = worm.map_y - (mainCanvas.height / 2 / zoom);
->>>>>>> fdc23b3 (ew stinky zoom conflicts ew)
             
             // 2. Clamp (Limit) the camera to the World Edges
             // Left/Top Limit: Cannot go less than 0
@@ -120,13 +107,7 @@
             
             ctx.save(); // <--- START CAMERA
             
-<<<<<<< HEAD
             ctx.scale(map.cameraScale, map.cameraScale);
-=======
-            // Apply Zoom first
-            ctx.scale(zoom, zoom);
-            // Move the world relative to the camera
->>>>>>> fdc23b3 (ew stinky zoom conflicts ew)
             ctx.translate(-camX, -camY);
             
             // Draw Background
@@ -144,11 +125,7 @@
                 ctx.stroke();
             }
             
-<<<<<<< HEAD
             map.draw(ctx);
-=======
-            // Draw Player (The player simply draws itself at map_x, map_y)
->>>>>>> fdc23b3 (ew stinky zoom conflicts ew)
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA

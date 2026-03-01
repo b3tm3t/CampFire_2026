@@ -2,11 +2,7 @@ import { Node } from './Node.js';
 import { Map } from './Map.js';
 
 export class Player {
-<<<<<<< HEAD
     // Materials
-=======
-    // Position in the World
->>>>>>> fdc23b3 (ew stinky zoom conflicts ew)
     map_x = 0;
     map_y = 0;
 
