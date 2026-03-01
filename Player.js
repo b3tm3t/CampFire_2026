@@ -115,13 +115,6 @@ export class Player {
     updatePos() {
         this.pos_x += Math.cos(this.currentAngle) * this.forwardVelocity;
         this.pos_y += Math.sin(this.currentAngle) * this.forwardVelocity;
-
-        if (this.pos_x >= canvasWidth || this.pos_x <= 0) {
-            this.pos_x = Math.max(0, Math.min(canvasWidth, this.pos_x));
-        }
-        if (this.pos_y >= canvasHeight || this.pos_y <= 133) {
-            this.pos_y = Math.max(133, Math.min(canvasHeight, this.pos_y));
-        }
     }
 
     
