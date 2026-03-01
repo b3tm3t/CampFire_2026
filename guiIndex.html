@@ -126,10 +126,37 @@
         let ticks = 0;
         let gameTime = 120; // 2 minutes (in seconds)
         let isGameRunning = false;
-        
+
+        let timeLeft = 120;
+
         // --- ASSETS ---
         const backgroundImage = new Image();
         backgroundImage.src = "./BackdropWormGame.png";
+        
+        // --- 3. CREATE OBJECTS ---
+        const rocks = [];
+        
+        // Create 20 random rocks
+        for(let i = 0; i < 20; i++) {
+            // Random Position
+            let rx = Math.random() * worldWidth;
+            let ry = Math.random() * (worldHeight - 310) + 310;
+            
+            // Random Size (Radius between 30 and 80)
+            let rSize = Math.random() * 50 + 30;
+            
+            // Create the rock
+            rocks.push(new Rock(rx, ry, rSize));
+        }
+        // --- FIX: Start Length is now 1 ---
+
+        const map = new Map(worldWidth, worldHeight);
+        const worm = new Player(700, 400, 4, 30, 100, 1, map);
+        map.setPlayer(worm); 
+        
+        // Input Handling
+        window.addEventListener('keydown', (e) => keys[e.key] = true);
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
         
         // --- AUDIO SYSTEM ---
         const playlist = ['./audio/Worm on a roll.mp3', './audio/Egypt.mp3'];
@@ -144,10 +171,6 @@
         }
         audioPlayer.addEventListener('ended', playNextTrack);
         
-        // --- CREATE OBJECTS ---
-        const map = new Map(worldWidth, worldHeight); 
-        const rocks = [];
-        
         // Generate Rocks
         for(let i = 0; i < 20; i++) {
             let rx = Math.random() * worldWidth;
@@ -157,8 +180,8 @@
         }
         
         // Create Worm (Start length 1)
-        const worm = new Player(700, 400, 4, 30, 100, 1, map);
-        map.setPlayer(worm);
+        // Params: x, y, maxSpeed, width, health, length, map
+
         // --- MAIN GAME LOOP ---
         function gameLoop() {
             if (!isGameRunning) return;
