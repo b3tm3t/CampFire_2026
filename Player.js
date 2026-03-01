@@ -10,9 +10,11 @@ export class Player {
     width = 0;
     currentAngle = 0;
     health = 0;
+    velocityDampened = false;
     
     angleTurning = 6; 
     forwardVelocity = 0;
+    tempVel = 0;
     secondsSurvived = 0;
     
     constructor(map_x, map_y, speed, width, health, length, map) {
@@ -64,9 +66,14 @@ export class Player {
         input.ArrowDown || input.s || input.ArrowUp || input.w;
         
         if (isMoving) {
-            this.forwardVelocity += 0.5; 
+            this.tempVel += 0.5; 
         } else {
-            this.forwardVelocity *= 0.9; 
+            this.tempVel *= 0.9; 
+        }
+        if (this.velocityDampened) {
+            this.forwardVelocity = this.tempVel * 0.7;
+        } else {
+            this.forwardVelocity = this.tempVel;
         }
         this.forwardVelocity = Math.max(0, Math.min(this.speed, this.forwardVelocity));
     }

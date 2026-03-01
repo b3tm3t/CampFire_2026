@@ -65,6 +65,7 @@ export class Map {
                     
                     // Check if there is dirt here
                     if (this.grid[idx] === Map.DIRT) {
+                        Worm.velocityDampened = true; // Dampen velocity when digging
                         this.grid[idx] = Map.NOTHING; // Remove it
                         dirtDug++; 
                         this.dirtRemoved++; // Track for percentage
