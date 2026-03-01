@@ -52,7 +52,7 @@ export class Player {
                        input.ArrowDown || input.s || input.ArrowUp || input.w;
 
         if (isMoving) {
-            this.forwardVelocity += 0.5;
+            this.forwardVelocity += 0.2;
         } else {
             this.forwardVelocity *= 0.9; // Friction
         }
