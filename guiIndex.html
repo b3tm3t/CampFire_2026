@@ -90,7 +90,7 @@
             </div>
         </div>
         
-        <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 5...</h3>
+        <h3 id="countdown" style="font-size: 2.5rem; color: #e74c3c; margin-bottom: 0;">Starting in 15...</h3>
     </div>
     
     <div id="endCard" class="card" style="display: none;">
@@ -135,7 +135,7 @@
         const playlist = ['./audio/Worm on a roll.mp3', './audio/Egypt.mp3'];
         let currentTrack = 0;
         const audioPlayer = new Audio(playlist[currentTrack]);
-        audioPlayer.volume = 0.4; 
+        audioPlayer.volume = 1.0; 
         
         function playNextTrack() {
             currentTrack = (currentTrack + 1) % playlist.length;
@@ -200,9 +200,9 @@
                 worm.health = Math.min(100, worm.health + 0.1);
             }
             
-            // Condition D: Victory (99.9% Cleared)
+            // Condition D: Victory (75% Cleared)
             let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
-            if (percent > 99.9) {
+            if (percent > 75) {
                 endGame("Victory!", "The garden is clean and the soil is fresh!");
                 return;
             }
@@ -303,7 +303,7 @@
             // 2. Show Instructions
             instructionCard.style.display = 'block';
             
-            let secondsLeft = 5;
+            let secondsLeft = 10;
             
             // 3. Countdown Timer
             const timerInterval = setInterval(() => {
