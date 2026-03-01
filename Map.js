@@ -19,7 +19,7 @@ export class Map {
 
         // 2. Fill the whole thing with Brown
         this.shadowCtx.fillStyle = "#8B4513";
-        this.shadowCtx.fillRect(0, 0, width, height);
+        this.shadowCtx.fillRect(0, 290, width, height);
     }
 
     dig(pos_x, pos_y, radius) { 
