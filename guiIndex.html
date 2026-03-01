@@ -109,16 +109,16 @@
 
         const missions = [
             {
-                title: "Deep Sea Excavation",
-                text: "The lower layers are densest. Tunnel down to 1000px and clear the toxic core!"
+                title: "Churn up the soil",
+                text: "Dig up 10 % of the soil."
             },
             {
                 title: "Surface Sweep",
-                text: "The topsoil is clogging up. Stay high and clear 10% of the upper layer quickly!"
+                text: "Dig up the entire topsoil"
             },
             {
-                title: "Rocky Recovery",
-                text: "The rocks are leaching chemicals. Dig around at least 15 rocks to neutralize them!"
+                title: "Let Mother Earth breathe",
+                text: "Create a clear path between the top and bottom."
             }
         ];
 
@@ -257,6 +257,7 @@
             
             // Rain Logic
             if (Math.random() < 0.0002) map.startRain();
+
             if (map.isRaining) {
                 map.rainTime = (map.rainTime || 0) + 1;
                 if (map.rainTime < 60 * 20) map.rainLevel += 1;
