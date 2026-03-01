@@ -52,10 +52,9 @@
     
     <script type="module">
         import { Player } from './Player.js';
-        import { Map } from './Map.js'; // Assuming you have this file
+        import { Map } from './Map.js'; 
         
         const myButton = document.getElementById('startBtn');
-        const myTitle = document.getElementById('message');
         const mainCanvas = document.getElementById('gameCanvas');
         const ctx = mainCanvas.getContext('2d');
         const keys = {};
@@ -69,7 +68,9 @@
         backgroundImage.src = "./BackdropWormGame.png";
         
         // --- 3. CREATE OBJECTS ---
-        const map = new Map(300, 125); // Dummy map object per your code
+        // FIX: Increased map size. Player is at 700, so map must be wider than 300.
+        // We set it to 1000 so the loop doesn't lag too much.
+        const map = new Map(1000, 800); 
         
         // Player starts at (700, 400)
         const worm = new Player(700, 400, 5, 30, 100, 1, map);
@@ -85,22 +86,13 @@
             worm.updatePos(worldWidth, worldHeight); 
             
             // B. CAMERA LOGIC
-            // FIXED: Changed worm.pos_x to worm.map_x (The variable that actually exists)
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             // Clamp camera to world edges
+            // FIX: Removed the second duplicate block that used 'zoom' (which caused the crash)
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
-            
-            // 2. Clamp (Limit) the camera to the World Edges
-            // Left/Top Limit: Cannot go less than 0
-            camX = Math.max(0, camX);
-            camY = Math.max(0, camY);
-            
-            // Right/Bottom Limit: Cannot go past WorldWidth - ScreenWidth
-            camX = Math.min(camX, worldWidth - (mainCanvas.width / zoom));
-            camY = Math.min(camY, worldHeight - (mainCanvas.height / zoom));
             
             // C. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
@@ -131,13 +123,11 @@
             ctx.restore(); // <--- END CAMERA
             
             // D. HUD (Fixed on screen)
-            // Draw the Top UI Bar area (Where the player can't go)
             ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(0, 0, mainCanvas.width, 60); // Simple visual bar
+            ctx.fillRect(0, 0, mainCanvas.width, 60); 
 
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            // Fixed HUD variable names too
             ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)}`, 20, 40);
             
             requestAnimationFrame(gameLoop);
