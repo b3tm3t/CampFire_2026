@@ -43,7 +43,7 @@ export class Player {
 
             let desiredAngle = Math.atan2(dy, dx);
 
-            let angleDiff = (desiredAngle - this.currentAngle);
+            let diff = (desiredAngle - this.currentAngle);
             
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
