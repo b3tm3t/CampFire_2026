@@ -23,7 +23,7 @@ export class Map {
         
         // 1. FILL WITH DIRT (This creates the brown background)
         // If you want empty space, change this to 0 (NOTHING)
-        this.grid.fill(1); 
+        this.grid.fill(0); 
     }
 
     setTile(x, y, value) {
