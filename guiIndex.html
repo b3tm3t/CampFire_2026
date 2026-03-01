@@ -19,7 +19,9 @@
     <canvas id="gameCanvas"></canvas>
     
     <script type="module">
-        import { Player } from './Player.js';
+        // 1. IMPORT: This pulls the code from your other file
+        import {Player} from './Player.js';
+        import {Map} from './Map.js';
         
         const myButton = document.getElementById('startBtn');
         const myTitle = document.getElementById('message');
@@ -34,10 +36,14 @@
         
         // 2. LOAD BACKGROUND
         const backgroundImage = new Image();
-        backgroundImage.src = "./BackdropWormGame.png"; 
         
-        // 3. CREATE PLAYER (Center of World)
-        const worm = new Player(1500, 1500, 6, 30, 100);
+        // 3. CREATE PLAYER & BG
+        // We use the 5 arguments your class requires: (x, y, speed, width, health)
+        const map = new Map(300, 125);
+
+        const worm = new Player(700, 400, 5, 30, 100, map);
+        
+        backgroundImage.src = "./BackdropWormGame.png";
         
         window.addEventListener('keydown', (e) => keys[e.key] = true);
         window.addEventListener('keyup', (e) => keys[e.key] = false);
@@ -87,6 +93,8 @@
             ctx.restore(); // End Camera
             
             // D. HUD (Text stays fixed on screen)
+
+            // Debug
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             ctx.fillText(`Pos: ${Math.floor(worm.pos_x)}, ${Math.floor(worm.pos_y)}`, 20, 40);

@@ -1,8 +1,17 @@
+import { Node } from './Node.js';
+import { Map } from './Map.js'
+
 export class Player {
-    pos_x = 0;
-    pos_y = 0;
+    // Materials
+    cam_x = 0;
+    cam_y = 0;
+
+    map_x = 0;
+    map_y = 0;
+
     speed = 0;
     width = 0;
+
     currentAngle = 0;
     health = 0;
     
@@ -10,12 +19,24 @@ export class Player {
     angleTurning = 3; 
     forwardVelocity = 0;
 
-    constructor(pos_x, pos_y, speed, width, health) {
-        this.pos_x = pos_x;
-        this.pos_y = pos_y;
+    secondsSurvived = 0;
+    
+
+    constructor(map_x, map_y, speed, width, health, length, map) {
+        this.map_x = map_x;
+        this.map_y = map_y;
+
         this.speed = speed;
         this.width = width;
         this.health = health;
+        this.length = length;
+        
+        this.wormNodes = new Array(1);
+
+        this.wormNodes[0] = new Node(map_x, map_y, 1, this);
+
+        this.map = map;
+
     }
 
     calculateAngle(input) { 
@@ -59,34 +80,63 @@ export class Player {
         this.forwardVelocity = Math.max(0, Math.min(this.speed, this.forwardVelocity));
     }
 
-    // UPDATED: Now accepts worldWidth/Height instead of canvas size
-    updatePos(worldWidth, worldHeight) {
-        let nextX = this.pos_x + Math.cos(this.currentAngle) * this.forwardVelocity;
-        let nextY = this.pos_y + Math.sin(this.currentAngle) * this.forwardVelocity;
+    // 1. Accept the canvas size so we know where the walls are
+    updatePos(canvasWidth, canvasHeight) {
+        
+        // 2. Calculate the "Half Width" (radius) 
+        // Since you draw from the center, this is the distance from center to edge.
+        let halfSize = this.width / 2;
 
-        let r = this.width / 2;
+        // 3. Calculate where the player WANTS to go next
+        let nextX = this.map_x + Math.cos(this.currentAngle) * this.forwardVelocity / Map.cameraScale;
+        let nextY = this.map_y + Math.sin(this.currentAngle) * this.forwardVelocity / Map.cameraScale;
 
-        // Check collision against the WORLD size (3000), not the screen size
-        if (nextX > r && nextX < worldWidth - r) {
-            this.pos_x = nextX;
+        // 4. Horizontal Collision (Left and Right Walls)
+        // logic: Is nextX greater than the left edge AND less than the right edge?
+        if (nextX > halfSize && nextX < canvasWidth - halfSize) {
+            this.map_x = nextX;
         }
-        if (nextY > (291+r) && nextY < worldHeight - r) {
-            this.pos_y = nextY;
+
+        // 5. Vertical Collision (Top and Bottom Walls)
+        // logic: Is nextY greater than the top edge AND less than the bottom edge?
+        if (nextY > (133 + halfSize) && nextY < canvasHeight - halfSize) {
+            this.map_y = nextY;
         }
     }
 
-    draw(ctx) {
-        ctx.save();
-        ctx.translate(this.pos_x, this.pos_y);
-        ctx.rotate(this.currentAngle);
+    eat(num) { // See how much you eat, and increase 
+        
+    }
+
+    cameraPos() {
+
+    }
+
+    draw(ctx) { // Like refresh
+
         
         ctx.fillStyle = "#2ecc71";
-        ctx.fillRect(-this.width / 2, -this.width / 2, this.width, this.width);
-        
-        // Added a small "eye" so you can see rotation
-        ctx.fillStyle = "black";
-        ctx.fillRect(5, -5, 5, 5); 
 
-        ctx.restore();
+        // 4. Draw the square CENTERED on (0,0)
+        // We use -width/2 so the center of the square is the rotation point
+
+        let headNode = this.wormNodes[0];
+
+        let screenX = headNode.width / 2 * Map.cameraScale;
+        let screenY = headNode.width / 2 * Map.cameraScale;
+
+        ctx.fillRect(this.map_x-screenX, this.map_y-screenY, screenX, screenY);
+
+        ctx.restore(); // 5. Restore the canvas to how it was before
+        
     }
+
+
+
+
+
+    
+
+    
+
 }

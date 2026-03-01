@@ -1,4 +1,4 @@
-class Map {
+export class Map {
     // Materials
     static NOTHING = 0;
     static DIRT = 1;
@@ -12,12 +12,15 @@ class Map {
     static POOP = 10;
     static TRASH = 20;
 
-    scale = 20; // How much pixels wide each thing is
+    static cameraScale = 5; // How much pixels wide each tile is
 
     constructor(width, height) {
         this.width = width;
         this.height = height;
-        const grid = new Int8Array(width * height);
+        
+        this.grid = new Int8Array(width * height);
+
+        this.grid.fill(1); 
 
     }
 
@@ -34,17 +37,25 @@ class Map {
     dig(pos_x, pos_y, radius) { // Int x, int y, int radius
         for (let x = -radius; x < radius; x++) {
             for (let y = -radius; y < radius; y++) { 
-                this.setTile(pos_x, pos_y, NOTHING);
+
+                if ((x ** 2 + y **2 ) ** (1/2) < radius) {
+
+                    this.setTile(pos_x + x, pos_y + y, Map.NOTHING);
+
+                    console.log("Positions: ", pos_x + " " + pos_y)
+                }
+                
             }
         }
     }
 
     draw(ctx) {
+        
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const tile = this.grid[(y * this.width) + x];
 
-                if (tile === Map.DIRT) {
+                if (tile == Map.DIRT) {
                     ctx.fillStyle = "#8B4513"; // SaddleBrown color for dirt
                     ctx.fillRect(
                         x * this.scale, 
