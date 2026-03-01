@@ -31,7 +31,7 @@ export class Map {
     }
 
     changeScale(newScale) {
-        this.scale = newScale;
+        this.cameraScale = newScale;
     }
 
     dig(pos_x, pos_y, radius) { // Int x, int y, int radius
@@ -44,7 +44,6 @@ export class Map {
 
                     console.log("Positions: ", pos_x + " " + pos_y)
                 }
-                
             }
         }
     }
@@ -56,12 +55,13 @@ export class Map {
                 const tile = this.grid[(y * this.width) + x];
 
                 if (tile == Map.DIRT) {
+
                     ctx.fillStyle = "#8B4513"; // SaddleBrown color for dirt
                     ctx.fillRect(
-                        x * this.scale, 
-                        y * this.scale, 
-                        this.scale, 
-                        this.scale
+                        x * this.cameraScale, 
+                        y * this.cameraScale, 
+                        this.cameraScale, 
+                        this.cameraScale
                     );
                 }
             }

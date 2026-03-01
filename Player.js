@@ -3,9 +3,6 @@ import { Map } from './Map.js'
 
 export class Player {
     // Materials
-    cam_x = 0;
-    cam_y = 0;
-
     map_x = 0;
     map_y = 0;
 
