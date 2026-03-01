@@ -123,33 +123,40 @@ export class Player {
             ctx.save();
             ctx.translate(node.x, node.y);
             
-            // Draw Circle
+            // 1. Draw the Circle (Body or Head)
             ctx.beginPath();
             ctx.arc(0, 0, this.width / 2, 0, Math.PI * 2);
             ctx.fillStyle = (i === 0) ? "#2ecc71" : "#27ae60"; // Head is lighter green
             ctx.fill();
             
-            // Optional: Eyes on the Head only
-            if (i === 0) {
+            // 2. Head Specific Things (Eyes & Health Bar)
+            if (i === 0) { 
+                
+                // --- A. Draw Eyes ---
+                ctx.save(); // Save before rotating for eyes
                 ctx.rotate(this.currentAngle);
                 ctx.fillStyle = "black";
                 ctx.fillRect(5, -5, 5, 5); // Right eye
                 ctx.fillRect(5, 5, 5, 5);  // Left eye
-            }
-            // Health Bar Background (Red)
+                ctx.restore(); // Restore so health bar doesn't rotate with head
+                
+                // --- B. Draw Health Bar ---
+                // (Offsets are x=-25, y=-40 to float above the head)
+                
+                // Background (Red)
                 ctx.fillStyle = "red";
                 ctx.fillRect(-25, -40, 50, 6);
-
-                // Health Bar Foreground (Green)
-                // Calculates width based on health percentage
+                
+                // Foreground (Green)
                 let hpPercent = this.health / 100; 
                 ctx.fillStyle = "#00ff00";
                 ctx.fillRect(-25, -40, 50 * hpPercent, 6);
                 
-                // Border (Black outline)
+                // Border (Black)
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 1;
                 ctx.strokeRect(-25, -40, 50, 6);
+            }
             
             ctx.restore();
         }
