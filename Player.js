@@ -48,7 +48,8 @@ export class Player {
             while (diff < -Math.PI) diff += Math.PI * 2;
             while (diff > Math.PI) diff -= Math.PI * 2;
 
-            if (Math.abs(diff) < (Math.PI / 180) * this.angleTurning) {
+            let step = (Math.PI / 180) * this.angleTurning;
+            if (Math.abs(diff) < step) {
                 this.currentAngle = desiredAngle;
             } else {
                 this.currentAngle += diff > 0 ? step : -step;
