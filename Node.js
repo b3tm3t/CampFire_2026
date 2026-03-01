@@ -63,7 +63,7 @@ export class Node {
 
         if (this.referenceSegment < 15) {
             this.color = this.REGULAR;
-            return 15;
+            return 18;
         }
 
         if (this.referenceSegment < 30) {
@@ -74,12 +74,12 @@ export class Node {
         if (this.referenceSegment < 40) {
             this.color = this.REGULAR;
             
-            return 15;
+            return 18;
         }
 
         if (this.referenceSegment < 85) {
             this.color = this.REGULAR;
-            return 15;
+            return 18;
         }
 
         this.color = this.REGULAR;
@@ -92,22 +92,22 @@ export class Node {
 
         if (this.referenceSegment < 15) {
             this.color = this.REGULAR;
-            return 15;
+            return 20;
         }
 
         if (this.referenceSegment < 30) {
             this.color = this.RING;
-            return 20;
+            return 22;
         }
 
         if (this.referenceSegment < 40) {
             this.color = this.REGULAR;
-            return 15;
+            return 20;
         }
 
         if (this.referenceSegment < 85) {
             this.color = this.REGULAR;
-            return 15;
+            return 20;
         }
 
         this.color = this.REGULAR;

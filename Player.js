@@ -103,7 +103,7 @@ export class Player {
                     
                     // Take Damage
                     if (this.damageCooldown === 0) {
-                        this.health -= 20; 
+                        this.health -= 10; 
                         console.log("Ouch! Health:", this.health);
                         this.damageCooldown = 60; // 1 second invulnerability
                         
@@ -152,9 +152,10 @@ export class Player {
     }   
 
     drown() {
-        if (map_y > this.map.rainLevel) { // If it is deeper down in the 
+        if (this.map_y > this.map.rainLevel) { // If it is deeper down in the 
             this.hydration += 1;
         }
+
     }
 
     

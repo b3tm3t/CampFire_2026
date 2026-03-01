@@ -129,10 +129,38 @@
 
         // --- ASSETS ---
         const backgroundImage = new Image();
-        backgroundImage.src = "./BackdropWormGame.png"; // Ensure this file exists!
-
-        // --- AUDIO ---
-        const playlist = ['./audio/Worm on a roll.mp3', './audio/Bloopin.mp3'];
+        backgroundImage.src = "./BackdropWormGame.png";
+        
+        // --- 3. CREATE OBJECTS ---
+        map = new Map(worldWidth, worldHeight); 
+        rocks = [];
+        
+        // Create 20 random rocks
+        for(let i = 0; i < 20; i++) {
+            // Random Position
+            let rx = Math.random() * worldWidth;
+            let ry = Math.random() * (worldHeight - 310) + 310;
+            
+            // Random Size (Radius between 30 and 80)
+            let rSize = Math.random() * 50 + 30;
+            
+            // Create the rock
+            rocks.push(new Rock(rx, ry, rSize));
+        }
+        // --- FIX: Start Length is now 1 ---
+        worm = new Player(700, 400, 4, 30, 100, 1, map);
+        map.setPlayer(worm); 
+        
+        // Input Handling
+        window.addEventListener('keydown', (e) => keys[e.key] = true);
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
+        
+        // --- AUDIO SYSTEM ---
+        const playlist = [
+        './audio/Worm on a roll.mp3',
+        './audio/Egypt.mp3'
+        ];
+        
         let currentTrack = 0;
         const audioPlayer = new Audio(playlist[currentTrack]);
         audioPlayer.volume = 0.4; 
@@ -169,9 +197,10 @@
             // 1. UPDATE PHYSICS
             worm.calculateAngle(keys);
             
-            let dirtDug = 0;
+            let dirtDug = map.dig(worm.wormNodes[0].pos_x, worm.wormNodes[0].pos_y, worm.wormNodes[0].width);
+            // Calculate dirt removed
             for (let i = 0; i < worm.wormNodes.length; i++) {
-                dirtDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
+                map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
             }
             
             worm.calculateVelocity(keys, dirtDug);
@@ -185,15 +214,20 @@
                 return;
             }
 
-            // Condition B: Time
-            let secondsPassed = Math.floor(ticks / 60); // Assuming 60 FPS
-            let timeLeft = gameTime - secondsPassed;
-            if (timeLeft <= 0) {
-                endGame("Time's Up!", "The soil toxicity levels remain too high.");
-                return;
-            }
+            worm.drown();
 
-            // Condition C: Win (99.9% Cleared)
+            if (Math.random() < 0.01) {
+                worm.health = Math.min(100, worm.health + 2);
+            }
+            
+            // ... rest of loop (growth logic, camera, drawing) ...
+            // B. DIGGING LOGIC
+            // Dig at every node position
+            
+            
+            
+            // --- FIX: PERCENTAGE BASED GROWTH ---
+            // Calculate current percentage
             let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
             if (percent > 99.9) {
                 endGame("Victory!", "The garden is clean and the soil is fresh!");
@@ -235,12 +269,23 @@
             // Rain
             if (Math.random() < 0.0002) map.startRain();
             if (map.isRaining) {
-                map.rainLevel += 5; 
-                if (map.rainLevel > worldHeight) map.isRaining = false;
+
+                map.rainTime += 1
+
+                if (map.rainTime < 60 * 20) {
+                    map.rainLevel += 1; // The rain goes up
+                } else if (map.rainTime < 60 * 30) {
+
+                } else if (map.rainTime < 60 * 50) {
+                    map.rainLevel -= 1; // Goes down
+                } else {
+                    map.isRaining = false;
+                }
             }
             
-            map.draw(ctx, worldWidth);
+            map.draw(ctx);
             worm.draw(ctx);
+            
             
             // Rocks (Draw before restore so they move with camera)
             for (let r of rocks) {
@@ -323,6 +368,8 @@
                 mainCanvas.height = window.innerHeight;
             }
         });
+
+
     </script>
 </body>
 </html>
