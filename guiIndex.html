@@ -14,6 +14,7 @@
     
     <div class="card">
         <h1 id="message">Worm Game 3</h1>
+        <input type="file" id="bgInput" accept="image/*">
         <button id="startBtn">Start Game</button>
         <canvas id="gameCanvas"></canvas>
     </div>
@@ -28,10 +29,12 @@
         const mainCanvas = document.getElementById('gameCanvas');
         const ctx = mainCanvas.getContext('2d');
         const keys = {};
+        const backgroundImage = new Image();
         
-        // 3. CREATE PLAYER 
+        // 3. CREATE PLAYER & BG
         // We use the 5 arguments your class requires: (x, y, speed, width, health)
         const worm = new Player(700, 400, 5, 30, 100);
+        backgroundImage.src = "./BackdropWormGame.png";
         
         // 4. INPUTS
         window.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -41,6 +44,9 @@
         function gameLoop() {
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
+            if (backgroundImage){
+                ctx.drawImage(backgroundImage, 0, 0, mainCanvas.width, mainCanvas.height);
+            }
             // Call ALL three methods in order
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
