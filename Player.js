@@ -77,7 +77,7 @@ export class Player {
             this.map_x = nextX;
         }
 
-        if (nextY > (290 + r) && nextY < worldHeight - r) {
+        if (nextY > (310 + r) && nextY < worldHeight - r) {
             this.map_y = nextY;
         }
 
