@@ -131,7 +131,7 @@ export class Player {
 
         // 5. Vertical Collision (Top and Bottom Walls)
         // logic: Is nextY greater than the top edge AND less than the bottom edge?
-        if (nextY > halfSize && nextY < canvasHeight - halfSize) {
+        if (nextY > (133 + halfSize) && nextY < canvasHeight - halfSize) {
             this.pos_y = nextY;
         }
     }
