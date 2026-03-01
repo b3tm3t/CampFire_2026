@@ -88,7 +88,7 @@ export class Player {
             this.map_x = nextX;
         }
 
-        if (nextY > (133 + halfSize) && nextY < canvasHeight - halfSize) {
+        if (nextY > (290 + halfSize) && nextY < canvasHeight - halfSize) {
             this.map_y = nextY;
         }
     }

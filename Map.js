@@ -12,7 +12,7 @@ export class Map {
     static POOP = 10;
     static TRASH = 20;
 
-    static cameraScale = 5; // How much pixels wide each tile is
+    static cameraScale = 3; // How much pixels wide each tile is
 
     constructor(width, height) {
         this.width = width;
