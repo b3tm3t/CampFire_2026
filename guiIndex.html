@@ -68,7 +68,9 @@
         backgroundImage.src = "./BackdropWormGame.png";
         
         // --- 3. CREATE OBJECTS ---
-        const map = new Map(1000, 800); 
+        // FIX 1: Pass worldWidth/Height so the map covers the whole world!
+        const map = new Map(worldWidth, worldHeight); 
+        
         const worm = new Player(700, 400, 5, 30, 100, 1, map);
         
         // Input Handling
@@ -80,12 +82,17 @@
             worm.calculateAngle(keys);
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
+
+            // FIX 2: TRIGGER THE DIGGING
+            // If Spacebar is pressed, dig a hole at the worm's position
+            if (keys[' ']) {
+                map.dig(worm.map_x, worm.map_y, worm.width);
+            }
             
             // B. CAMERA LOGIC
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
-            // Clamp camera to world edges
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
             
@@ -97,19 +104,18 @@
             ctx.scale(map.cameraScale, map.cameraScale);
             ctx.translate(-camX, -camY);
             
-            // Draw Background
+            // Draw Background (The image behind the dirt)
             if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
                 ctx.drawImage(backgroundImage, 0, 0, worldWidth, worldHeight);
             } else {
-                ctx.strokeStyle = "#444";
-                ctx.lineWidth = 5;
-                ctx.strokeRect(0, 0, worldWidth, worldHeight);
+                ctx.fillStyle = "#333"; // Fallback dark grey background
+                ctx.fillRect(0,0, worldWidth, worldHeight);
             }
             
-            // --- UPDATED DRAW CALL ---
-            // Pass the camera info so the map knows what to skip!
+            // Draw Map (The Dirt)
             map.draw(ctx);
             
+            // Draw Worm
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA
@@ -120,7 +126,7 @@
 
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)}`, 20, 40);
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y)} | Press SPACE to Dig`, 20, 40);
             
             requestAnimationFrame(gameLoop);
         }
