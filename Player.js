@@ -70,8 +70,8 @@ export class Player {
         }
         */
         // Safer boolean math
-        let dx = (input.ArrowRight ? 1 : 0) - (input.ArrowLeft ? 1 : 0);
-        let dy = (input.ArrowDown ? 1 : 0) - (input.ArrowUp ? 1 : 0);
+        let dx = (input.d ? 1 : 0) - (input.a ? 1 : 0);
+        let dy = (input.s ? 1 : 0) - (input.w ? 1 : 0);
 
         if (dx !== 0 || dy !== 0) {
             
