@@ -16,7 +16,6 @@ export class Player {
     angleTurning = 6; 
     forwardVelocity = 0;
     tempVel = 0;
-    secondsSurvived = 0;
     
     constructor(map_x, map_y, speed, width, health, length, map) {
         this.map_x = map_x;
@@ -27,12 +26,8 @@ export class Player {
         this.length = length;
         this.map = map;
         
-        this.dirtStomach = 0; 
-        this.growthThreshold = 23840; 
-        
         this.wormNodes = []; 
         for (let i = 0; i < this.length; i++) {
-            // Passing: x, y, index, and a reference to 'this' player
             this.wormNodes.push(new Node(this.map_x, this.map_y, i, this));
         }
     }
@@ -73,7 +68,7 @@ export class Player {
             this.tempVel *= 0.9; 
         }
         if (this.velocityDampened) {
-            this.forwardVelocity = this.tempVel * 0.7;
+            this.forwardVelocity = this.tempVel * 0.1;
         } else {
             this.forwardVelocity = this.tempVel;
         }
@@ -88,11 +83,11 @@ export class Player {
         if (nextX > r && nextX < worldWidth - r) { this.map_x = nextX; }
         if (nextY > (310 + r) && nextY < worldHeight - r) { this.map_y = nextY; }
         
-        // 2. Sync Head Node using Node class properties (.pos_x)
+        // Sync Head Node
         if(this.wormNodes[0]) {
             this.wormNodes[0].pos_x = this.map_x;
             this.wormNodes[0].pos_y = this.map_y;
-            this.wormNodes[0].update(); // Refresh width/color
+            this.wormNodes[0].update(); 
         }
         
         let spacing = this.width / 2; 
@@ -110,23 +105,21 @@ export class Player {
                 curr.pos_x = prev.pos_x - Math.cos(angle) * spacing;
                 curr.pos_y = prev.pos_y - Math.sin(angle) * spacing;
             }
-            
+
             curr.update();
         }
     }   
     
     draw(ctx) { 
-        // Draw starting from backwards
+        // Draw starting from tail to head
         for (let i = this.wormNodes.length - 1; i >= 0; i--) { 
             let node = this.wormNodes[i];
             
             ctx.save();
-            // Move pen to the node location
             ctx.translate(node.pos_x, node.pos_y);
             
             ctx.beginPath();
             ctx.arc(0, 0, node.width, 0, Math.PI * 2);
-            
             ctx.fillStyle = node.color; 
             ctx.fill();
             
@@ -148,19 +141,18 @@ export class Player {
                 ctx.strokeRect(-25, -40, 50, 6);
             }
             
-            // FIX: Draw text at 0,0 because we already translated context to the node position
-            if (node.referenceSegment) {
-                ctx.fillStyle = "black";
-                // ctx.fillText(Math.floor(node.referenceSegment), 0, 0); 
-            }
-            
             ctx.restore();
         }
     }        
+
     grow() {
         let tail = this.wormNodes[this.wormNodes.length - 1];
+        // Create new node at the tail's position
+        // The index is the current length
         let newNode = new Node(tail.pos_x, tail.pos_y, this.wormNodes.length, this);
         this.wormNodes.push(newNode);
+        
+        // Update length property
         this.length = this.wormNodes.length;
     }
 }

@@ -41,7 +41,7 @@
         // --- 1. WORLD SETTINGS ---
         const worldWidth = 3200;
         const worldHeight = 1800;
-        
+
         let ticks = 0;
         
         // --- 2. LOAD ASSETS ---
@@ -51,8 +51,8 @@
         // --- 3. CREATE OBJECTS ---
         const map = new Map(worldWidth, worldHeight); 
         
-        // Start length 30, but pass map
-        const worm = new Player(700, 400, 5, 1, 100, 30, map);
+        // --- FIX: Start Length is now 1 ---
+        const worm = new Player(700, 400, 5, 30, 100, 1, map);
         map.setPlayer(worm); 
         
         // Input Handling
@@ -83,33 +83,34 @@
             worm.calculateVelocity(keys);
             worm.updatePos(worldWidth, worldHeight); 
             
-            // FIX: Digging
-            // Only dig if we are moving? Or always?
-            // Current: Always digs
-            let amountDug = 0;
-            
+            // B. DIGGING LOGIC
+            // Dig at every node position
             for (let i = 0; i < worm.wormNodes.length; i++) {
-                // Dig using the node's position
-                amountDug += map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
+                map.dig(worm.wormNodes[i].pos_x, worm.wormNodes[i].pos_y, worm.wormNodes[i].width);
             }
             
-            worm.dirtStomach += amountDug;
-            
-            if (worm.dirtStomach > worm.growthThreshold) {
+            // --- FIX: PERCENTAGE BASED GROWTH ---
+            // Calculate current percentage
+            let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
+
+            // Formula: Start at 1. Add 1 segment for every 0.5% cleared.
+            // Example: 0.5% = Length 2. 1.0% = Length 3.
+            let targetLength = 1 + Math.floor(percent / 0.5);
+
+            // If we are shorter than the target, GROW
+            while (worm.wormNodes.length < targetLength) {
                 worm.grow();
-                worm.dirtStomach = 0; 
-                console.log("Worm grew! Length: " + worm.wormNodes.length);
+                console.log(`Growing! Pct: ${percent.toFixed(2)}% | New Length: ${worm.wormNodes.length}`);
             }
             
-            
-            // B. CAMERA LOGIC
+            // C. CAMERA LOGIC
             let camX = worm.map_x - (mainCanvas.width / 2 / map.cameraScale);
             let camY = worm.map_y - (mainCanvas.height / 2 / map.cameraScale);
             
             camX = Math.max(0, Math.min(camX, worldWidth - (mainCanvas.width / map.cameraScale)));
             camY = Math.max(0, Math.min(camY, worldHeight - (mainCanvas.height / map.cameraScale)));
             
-            // C. DRAWING
+            // D. DRAWING
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             
             ctx.save(); // <--- START CAMERA
@@ -124,59 +125,50 @@
                 ctx.fillStyle = "#333";
                 ctx.fillRect(0,0, worldWidth, worldHeight);
             }
-            
-            // --- FIX RAIN LOGIC ---
-            // 1 in 5000 chance per frame
+
+            // RAIN LOGIC
             if (Math.random() < 0.0002) { 
                 map.startRain();
             }
-            
+
             if (map.isRaining) {
-                map.rainLevel += 5; // Rain falls down
-                // Stop rain if it hits bottom
+                map.rainLevel += 5; 
                 if (map.rainLevel > worldHeight) {
                     map.isRaining = false;
                 }
             }
-            
+
             map.draw(ctx, worldWidth);
             worm.draw(ctx);
             
             ctx.restore(); // <--- END CAMERA
             
-            // D. HUD
+            // E. HUD
             ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, mainCanvas.width, 80); 
             
-            let currentDepth = 0;
-            let percentString = "0.00";
-            
-            if (map) {
-                let percent = (map.dirtRemoved / map.totalDirtPixels) * 100;
-                percentString = percent.toFixed(2);
-                currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
-            }
+            let percentString = percent.toFixed(2);
+            let currentDepth = Math.max(0, Math.floor(map.lowestDugY - 310));
             
             ctx.fillStyle = "white";
             ctx.font = "20px sans-serif";
             
+            // Line 1
+            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 35);
+
+            // Line 2
             ctx.fillStyle = "#ffff00"; 
-            ctx.fillText(`Deepest: ${currentDepth}px  |  Clear: ${percentString}%`, 20, 65);
-            
-            if (map.dirtRemoved / map.totalDirtPixels > 0.99) {
+            ctx.fillText(`Deepest: ${currentDepth}px  |  Length: ${worm.wormNodes.length}`, 20, 65);
+
+            if (percent > 99.9) {
                 document.getElementById('winCard').style.display = 'block';
                 return; 
             }
-            
-            // Dynamic Camera Zoom
-            map.cameraScale = Math.max(3 - worm.length/50, 1.2); // Slowed down zoom change
-            
-            ctx.fillStyle = "white";
-            ctx.font = "20px sans-serif";
-            ctx.fillText(`Pos: ${Math.floor(worm.map_x)}, ${Math.floor(worm.map_y-310)} | Dirt Cleared: ${percentString}%`, 20, 40);
+
+            // Dynamic Camera Zoom (Limit zoom out so we don't see edges too much)
+            map.cameraScale = Math.max(3 - worm.wormNodes.length/80, 1.0);
             
             requestAnimationFrame(gameLoop);
-            
             ticks++;
         }
         
